@@ -1,5 +1,9 @@
 const User = require("../models/user.model");
-const { deleteFile } = require("../utils/fileHandling");
+const {
+  deleteFile,
+  deleteFileLocal,
+  deleteFileCloudinary,
+} = require("../utils/fileHandling");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.getUser = async (req, res) => {
@@ -34,30 +38,49 @@ exports.getAllUsers = async (req, res) => {
 exports.patchUserImage = async (req, res) => {
   try {
     const userId = res.locals.authData?._id;
-    const coverImage =
-      req.files?.coverImage?.length > 0
-        ? req.files.coverImage[0]?.location
+    const userImageLocation =
+      req.files?.userImage?.length > 0
+        ? req.files.userImage[0]?.location
         : undefined;
     const editQuery = {};
 
-    if (coverImage) {
-      editQuery.image = coverImage;
+    if (userImageLocation) {
+      editQuery.image = userImageLocation;
+      editQuery.imagePublicId = req.files?.userImage[0]?.publicId;
     }
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      {
-        ...editQuery,
-      }
-    );
 
-    if (coverImage && user?.image) {
-      deleteFile(user?.image);
+    const [deleteData, user] = await Promise.all([
+      User.findById({ _id: userId })
+        .lean()
+        .then((res) => {
+          deleteFileCloudinary(res.imagePublicId);
+        }),
+      User.findOneAndUpdate(
+        { _id: userId },
+        {
+          ...editQuery,
+        },
+        { new: true }
+      ).lean(),
+    ]);
+
+    console.log({ deleteData, user });
+
+    // const user = await User.findOneAndUpdate(
+    //   { _id: userId },
+    //   {
+    //     ...editQuery,
+    //   }
+    // ).lean();
+
+    if (userImageLocation && user?.image) {
+      deleteFileLocal({ imagePath: req.files.userImage[0]?.path });
     }
-    
+
     if (!user) {
       throw new SetErrorResponse("User not found"); // default (Not found,404)
     }
-    return res.success( "User Updated ");
+    return res.success("User Updated", "Success");
   } catch (err) {
     return res.fail(err);
   }
@@ -85,9 +108,9 @@ exports.patchUser = async (req, res) => {
       throw new SetErrorResponse("User not found", 404);
     }
 
-    res.success({ userData: user }, "User updated");
+    return res.success({ userData: user }, "User updated");
   } catch (err) {
-    res.fail(err);
+    return res.fail(err);
   }
 };
 

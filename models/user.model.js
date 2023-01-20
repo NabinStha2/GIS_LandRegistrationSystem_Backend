@@ -33,6 +33,10 @@ const UserSchema = new Schema(
       type: String,
       trim: true,
     },
+    imagePublicId: {
+      type: String,
+      trim: true,
+    },
     address: {
       type: String,
       required: false,

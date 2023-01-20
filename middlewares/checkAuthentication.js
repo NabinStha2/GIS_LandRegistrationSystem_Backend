@@ -46,7 +46,12 @@ exports.checkAuthValidation = async (req, res, next) => {
             console.log(userId);
           }
         }
-        next();
+        if (!res.locals.authData || !res.locals?.authData?.success) {
+          // console.log(res.locals.authData)
+          return res
+            .status(res?.locals?.authData?.status || 500)
+            .send({ message: res?.locals?.authData?.message });
+        }
       } catch (err) {
         throw new SetErrorResponse(
           `Access Not Granted ! Please Login Again: ${err}`,
@@ -54,7 +59,6 @@ exports.checkAuthValidation = async (req, res, next) => {
         );
       }
     }
-
     next();
   } catch (error) {
     res.fail(error);

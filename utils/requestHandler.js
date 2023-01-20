@@ -14,7 +14,7 @@ exports.failCase = ({ req, res }) => {
       //     })
       //   })
       // }
-      console.log(err);
+      console.log({err});
       if (err instanceof SetErrorResponse) {
         statusCode = err?._meta_?.status;
         if (!(statusCode > 100 && statusCode < 999)) {
@@ -28,7 +28,7 @@ exports.failCase = ({ req, res }) => {
           status: err?._meta_?.status,
         });
       }
-      console.log({ metaError: err });
+      // console.log({ metaError: err });
 
       return res
         .status(500)

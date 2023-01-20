@@ -3,6 +3,7 @@ const {
   getAllUsers,
   deleteUser,
   patchUser,
+  patchUserImage,
 } = require("../controllers/user.controller");
 const {
   userRegisterController,
@@ -60,14 +61,14 @@ router.get("/", checkAuthValidation, getAllUsers);
 
 router.patch(
   "/:userId/user-image",
+  uploadImages({
+    singleName: "userImage",
+    folderName: "GISLandRegistration/userImage",
+  }),
   validate(["userId"]),
   validator,
   checkAuthValidation,
-  uploadImages({
-    singleName: "userImage",
-    secondaryPath: "GIS/landRegistration/userImage",
-  }),
-  patchUser
+  patchUserImage
 );
 
 router.patch(
