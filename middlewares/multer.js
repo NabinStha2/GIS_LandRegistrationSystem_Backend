@@ -19,7 +19,9 @@ exports.uploadImages = ({
           `GIS-${new Date()
             .toISOString()
             .replace(/:/g, "-")
-            .replace(".", "-", " ")}.${file.originalname.split(".")[1]}`
+            .replace(".", "-", " ")}-${
+            file.originalname.toLowerCase().replace(/ /g, "-").split(".")[0]
+          }`
         );
       },
     });
@@ -55,12 +57,12 @@ exports.uploadImages = ({
 
   const cloudinaryUpload = async (req, res, next) => {
     try {
-      console.log({ file: req.file, files: req.files.userImage });
+      console.log({ file: req.file, files: req.files });
       if (req.file) {
         const renameImage =
           new Date().toISOString().replace(/:/g, "-").replace(".", "-", " ") +
           "-" +
-          file.originalname.toLowerCase().replace(/ /g, "-");
+          file.originalname.toLowerCase().replace(/ /g, "-").split(".")[0];
         const result = await cloudinaryInit.uploader.upload(req.file.path, {
           folder: `developing/${folderName}`,
           resource_type: "image",
@@ -112,7 +114,7 @@ exports.uploadImages = ({
           const renameImage =
             new Date().toISOString().replace(/:/g, "-").replace(".", "-", " ") +
             "-" +
-            file.originalname.toLowerCase().replace(/ /g, "-");
+            file.originalname.toLowerCase().replace(/ /g, "-").split(".")[0];
           const [image] = await Promise.all([
             cloudinaryInit.uploader.upload(file.path, {
               folder: `developing/${folderName}`,

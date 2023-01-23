@@ -61,13 +61,13 @@ router.get("/", checkAuthValidation, getAllUsers);
 
 router.patch(
   "/:userId/user-image",
+  validate(["userId"]),
+  validator,
+  checkAuthValidation,
   uploadImages({
     singleName: "userImage",
     folderName: "GISLandRegistration/userImage",
   }),
-  validate(["userId"]),
-  validator,
-  checkAuthValidation,
   patchUserImage
 );
 

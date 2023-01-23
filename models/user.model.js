@@ -22,6 +22,12 @@ const UserSchema = new Schema(
       required: true,
       trim: true,
     },
+    citizenshipId: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
     name: {
       type: String,
       required: true,
@@ -29,13 +35,35 @@ const UserSchema = new Schema(
       index: "text",
       index: true,
     },
-    image: {
-      type: String,
-      trim: true,
+    imageFile: {
+      imageUrl: {
+        type: String,
+        trim: true,
+      },
+      imagePublicId: {
+        type: String,
+        trim: true,
+      },
     },
-    imagePublicId: {
-      type: String,
-      trim: true,
+    frontCitizenshipFile: {
+      frontCitizenshipImage: {
+        type: String,
+        trim: true,
+      },
+      frontCitizenshipPublicId: {
+        type: String,
+        trim: true,
+      },
+    },
+    backCitizenshipFile: {
+      backCitizenshipImage: {
+        type: String,
+        trim: true,
+      },
+      backCitizenshipPublicId: {
+        type: String,
+        trim: true,
+      },
     },
     address: {
       type: String,
@@ -46,7 +74,8 @@ const UserSchema = new Schema(
     phoneNumber: {
       type: String,
       trim: true,
-      required:true
+      index: true,
+      required: true,
     },
 
     hashed_password: {
