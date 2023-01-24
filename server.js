@@ -23,7 +23,7 @@ app.use("*", (req, res, next) => {
   next();
 });
 
-app.user("/", (req, res, next) => {
+app.use("/", (req, res, next) => {
   return res.success("", "Welcome to the GIS  Land Registration System.");
 });
 
