@@ -14,7 +14,7 @@ exports.failCase = ({ req, res }) => {
       //     })
       //   })
       // }
-      console.log({err});
+      // console.log({err});
       if (err instanceof SetErrorResponse) {
         statusCode = err?._meta_?.status;
         if (!(statusCode > 100 && statusCode < 999)) {
@@ -36,7 +36,7 @@ exports.failCase = ({ req, res }) => {
     };
   } catch (error) {
     console.log("This error needs Emergency Assist");
-    console.log(error);
+    // console.log(error);
     return res.status(500).send({ error: "Error needs Emergency Assist" });
   }
 };

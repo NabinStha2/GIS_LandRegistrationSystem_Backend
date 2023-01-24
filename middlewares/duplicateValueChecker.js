@@ -1,3 +1,4 @@
+const User = require("../models/user.model");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.checkDuplicateValue = (model, queries) => {
@@ -9,14 +10,23 @@ exports.checkDuplicateValue = (model, queries) => {
           const { key, value } = query;
           const values = value.split(".");
           returningData[key] = values.reduce((_req, _value) => {
-            console.log(_req, _value);
+            // console.log(_req, _value);
             return _req[_value]; //req.body.email
           }, req);
         });
         return returningData;
       };
       const valueToCheck = getQuery();
-      const valueChecked = await model.findOne(valueToCheck);
+      console.log(valueToCheck);
+      const valueChecked = await User.findOne({
+        $or: [
+          { email: valueToCheck.email },
+          {
+            phoneNumber: valueToCheck.password,
+          },
+        ],
+      });
+      // console.log(valueChecked);
       if (valueChecked) {
         throw new SetErrorResponse(
           `${[Object.keys(valueToCheck)]} already exist`,

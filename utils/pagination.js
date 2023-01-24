@@ -60,7 +60,8 @@ const getPaginatedData = async function (model, reqQuery, select = "+_id") {
 const getPaginatedDataCustom = async function (
   model,
   reqQuery,
-  select = "+_id"
+  select = "+_id",
+  { isAdmin = false }
 ) {
   try {
     const {
@@ -105,10 +106,20 @@ const getPaginatedDataCustom = async function (
     return {
       count,
       results: modFunction
-        ? (await Promise.all(results.map(modFunction))).filter(
-            (data) => data != null
-          )
-        : results,
+        ? (await Promise.all(results.map(modFunction))).filter((data) => {
+            return isAdmin
+              ? data != null
+              : data != null &&
+                  data.isVerified != "pending" &&
+                  data.isVerified != "rejected";
+          })
+        : results.map((data) => {
+            return isAdmin
+              ? data != null
+              : data != null &&
+                  data.isVerified != "pending" &&
+                  data.isVerified != "rejected";
+          }),
       paginated: "paginated",
     };
   } catch (err) {
@@ -116,12 +127,14 @@ const getPaginatedDataCustom = async function (
   }
 };
 
-exports.getFuzzySearchPaginatedData = async function (
+exports.getFuzzySearchPaginatedData = async function ({
   model,
   reqQuery,
   search,
-  select = "+_id"
-) {
+  select = "+_id",
+  isAdmin = false,
+}) {
+  console.log(isAdmin);
   try {
     const {
       query,
@@ -142,7 +155,10 @@ exports.getFuzzySearchPaginatedData = async function (
           search,
           select,
           { limit, page, sort, query, populate },
-          modFunction
+          modFunction,
+          {
+            isAdmin: isAdmin,
+          }
         )
       : getPaginatedDataCustom(
           model,
@@ -157,7 +173,10 @@ exports.getFuzzySearchPaginatedData = async function (
             sort,
             modFunction,
           },
-          select
+          select,
+          {
+            isAdmin: isAdmin,
+          }
         );
   } catch (err) {
     throw err;
@@ -169,7 +188,8 @@ async function getSearchDocuments(
   search,
   select = "_id",
   { limit, page, query },
-  modFunction
+  modFunction,
+  { isAdmin = false }
 ) {
   try {
     page = page && page > 0 ? parseInt(page) : 1;
@@ -192,7 +212,12 @@ async function getSearchDocuments(
     );
 
     results = results.filter((data) => {
-      return data._searchScore >= 0.2 && !data.notSending;
+      return isAdmin
+        ? data._searchScore >= 0.2 && !data.notSending
+        : data._searchScore >= 0.2 &&
+            !data.notSending &&
+            data.isVerified != "pending" &&
+            data.isVerified != "rejected";
     });
     const count = results?.length;
 

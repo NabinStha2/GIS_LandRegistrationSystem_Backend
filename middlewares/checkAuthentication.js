@@ -16,7 +16,7 @@ exports.checkAuthValidation = async (req, res, next) => {
     ) {
       try {
         token = req.headers.authorization.split(" ")[1];
-        console.log(token);
+        // console.log(token);
         const isCustomAuth = token.length < 500;
 
         const datas = jwt.decode(token);
@@ -25,7 +25,13 @@ exports.checkAuthValidation = async (req, res, next) => {
 
         let user = await User.findOne({ _id: datas._id });
 
-        if (!user) {
+        // console.log(user);
+
+        if (
+          !user ||
+          user.isVerified == "pending" ||
+          user.isVerified == "rejected"
+        ) {
           throw new SetErrorResponse(`User Not Found:`, 401);
         }
 
@@ -49,20 +55,18 @@ exports.checkAuthValidation = async (req, res, next) => {
           }
         }
         if (!res.locals.authData || !res.locals?.authData?.success) {
-          // console.log(res.locals.authData)
+          console.log(res.locals.authData);
           return res
             .status(res?.locals?.authData?.status || 500)
             .send({ message: res?.locals?.authData?.message });
         }
       } catch (err) {
-        throw new SetErrorResponse(
-          `Access Not Granted ! Please Login Again: ${err}`,
-          401
-        );
+        throw err;
       }
     }
     next();
   } catch (error) {
+    // console.log(error);
     res.fail(error);
   }
 };

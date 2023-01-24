@@ -13,7 +13,8 @@ exports.sendEmailToEmailAddress = async (emailData) => {
     const toEmail = userType === "user" ? email : superAdminEmail;
 
     console.log({ emailData });
-    console.log(process.env.SENDEREMAIL);
+    console.log(process.env.SENDER_EMAIL);
+    console.log(process.env.GIS_BASED_LAND_REGISTRATION_SENDINBLUE_API_KEY);
     var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
     var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail = {

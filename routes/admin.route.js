@@ -1,9 +1,4 @@
 const {
-  getUser,
-  getAllUsers,
-  deleteUser,
-} = require("../controllers/user.controller");
-const {
   adminRegisterController,
   adminVerifyOTPAndRegisterController,
   adminloginController,
@@ -15,6 +10,15 @@ const { validate } = require("../middlewares/validate");
 const { validator } = require("../utils/validator");
 const Admin = require("../models/admin.model");
 const { checkExistance } = require("../middlewares/checkExistance");
+const {
+  getAdmin,
+  patchAdminImage,
+  patchAdminFrontDocument,
+  patchAdminBackDocument,
+  patchAdmin,
+  deleteAdmin,
+  getAllUsersByAdmin,
+} = require("../controllers/admin/admin.controller");
 
 const router = require("express").Router();
 
@@ -59,17 +63,58 @@ router.get(
   validate(["userId"]),
   validator,
   checkAuthValidation,
-  getUser
+  getAdmin
 );
 
-router.get("/", checkAuthValidation, getAllUsers);
+router.get("/", checkAuthValidation, getAllUsersByAdmin);
+
+router.patch(
+  "/:userId/admin-image",
+  validate(["userId"]),
+  validator,
+  checkAuthValidation,
+  uploadImages({
+    folderName: "GISLandRegistration/userImage",
+  }),
+  patchAdminImage
+);
+
+// router.patch(
+//   "/:userId/admin-front-image",
+//   validate(["userId"]),
+//   validator,
+//   checkAuthValidation,
+//   uploadImages({
+//     folderName: "GISLandRegistration/userDocument",
+//   }),
+//   patchAdminFrontDocument
+// );
+
+// router.patch(
+//   "/:userId/admin-back-image",
+//   validate(["userId"]),
+//   validator,
+//   checkAuthValidation,
+//   uploadImages({
+//     folderName: "GISLandRegistration/userDocument",
+//   }),
+//   patchAdminBackDocument
+// );
+
+router.patch(
+  "/:userId",
+  validate(["userId", "firstName", "lastName", "phoneNumber", "address"]),
+  validator,
+  checkAuthValidation,
+  patchAdmin
+);
 
 router.delete(
   "/:userId",
   validate(["userId"]),
   validator,
   checkAuthValidation,
-  deleteUser
+  deleteAdmin
 );
 
 module.exports = router;

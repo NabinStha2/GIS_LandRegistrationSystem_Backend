@@ -87,7 +87,14 @@ exports.userloginController = async (req, res, next) => {
       { email },
       "+salt +hashed_password"
     );
-    console.log(existingUserData);
+    // console.log(existingUserData);
+    if (
+      !existingUserData ||
+      existingUserData.isVerified == "pending" ||
+      existingUserData.isVerified == "rejected"
+    ) {
+      throw new SetErrorResponse("User doesn't exist", 404);
+    }
     if (!existingUserData?.authentication(password)) {
       throw new SetErrorResponse("Unauthorized, Password Incorrect", 401);
     }

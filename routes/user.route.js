@@ -30,10 +30,12 @@ router.post(
     "phoneNumber",
     "address",
     "password",
-    "otp",
   ]),
   validator,
-  checkDuplicateValue(User, [{ key: "email", value: "body.email" }]),
+  checkDuplicateValue(User, [
+    { key: "email", value: "body.email" },
+    { key: "phoneNumber", value: "body.phoneNumber" },
+  ]),
   userRegisterController
 );
 
@@ -100,14 +102,6 @@ router.patch(
   validator,
   checkAuthValidation,
   patchUser
-);
-
-router.delete(
-  "/:userId",
-  validate(["userId"]),
-  validator,
-  checkAuthValidation,
-  deleteUser
 );
 
 module.exports = router;

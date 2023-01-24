@@ -24,7 +24,6 @@ const UserSchema = new Schema(
     },
     citizenshipId: {
       type: String,
-      required: true,
       trim: true,
       index: true,
     },
@@ -79,10 +78,11 @@ const UserSchema = new Schema(
       required: true,
     },
     isVerified: {
-      type: Boolean,
+      type: String,
       required: true,
-      default: false,
+      default: "pending",
       index: true,
+      enum: ["approved", "pending", "rejected"],
     },
     hashed_password: {
       type: String,

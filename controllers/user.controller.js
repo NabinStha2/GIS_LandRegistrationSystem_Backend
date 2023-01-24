@@ -1,6 +1,5 @@
 const User = require("../models/user.model");
 const {
-  deleteFile,
   deleteFileLocal,
   deleteFileCloudinary,
 } = require("../utils/fileHandling");
@@ -12,7 +11,13 @@ exports.getUser = async (req, res) => {
     const userId = req.params?.userId;
     const existingUser = await User.findById({ _id: userId }).lean();
 
-    if (!existingUser) {
+    console.log(existingUser);
+
+    if (
+      !existingUser ||
+      existingUser.isVerified == "pending" ||
+      existingUser.isVerified == "rejected"
+    ) {
       throw new SetErrorResponse("User not found", 404);
     }
 
@@ -90,7 +95,11 @@ exports.patchUserImage = async (req, res) => {
       deleteFileLocal({ imagePath: req.files.userImage[0]?.path });
     }
 
-    if (!user) {
+    if (
+      !user ||
+      user.isVerified == "pending" ||
+      user.isVerified == "rejected"
+    ) {
       throw new SetErrorResponse("User not found"); // default (Not found,404)
     }
 
@@ -150,7 +159,11 @@ exports.patchUserFrontDocument = async (req, res) => {
       deleteFileLocal({ imagePath: req.files.frontCitizenshipImage[0]?.path });
     }
 
-    if (!user) {
+    if (
+      !user ||
+      user.isVerified == "pending" ||
+      user.isVerified == "rejected"
+    ) {
       throw new SetErrorResponse("User not found"); // default (Not found,404)
     }
 
@@ -212,7 +225,11 @@ exports.patchUserBackDocument = async (req, res) => {
       deleteFileLocal({ imagePath: req.files.backCitizenshipImage[0]?.path });
     }
 
-    if (!user) {
+    if (
+      !user ||
+      user.isVerified == "pending" ||
+      user.isVerified == "rejected"
+    ) {
       throw new SetErrorResponse("User not found"); // default (Not found,404)
     }
 
@@ -242,24 +259,15 @@ exports.patchUser = async (req, res) => {
       { new: true }
     ).lean();
 
-    if (!user) {
+    if (
+      !user ||
+      user.isVerified == "pending" ||
+      user.isVerified == "rejected"
+    ) {
       throw new SetErrorResponse("User not found", 404);
     }
 
     return res.success({ userData: user }, "User updated");
-  } catch (err) {
-    return res.fail(err);
-  }
-};
-
-exports.deleteUser = async (req, res) => {
-  try {
-    const userId = res.locals.authData?._id;
-    const user = await User.findByIdAndDelete({ _id: userId });
-    if (!user) {
-      throw new SetErrorResponse("User not found"); // default (Not found,404)
-    }
-    return res.success({ userData: user }, "User Deleted ");
   } catch (err) {
     return res.fail(err);
   }
