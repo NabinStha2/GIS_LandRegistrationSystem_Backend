@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const crypto = require("crypto");
-const fuzzy = require("../utils/mongoose-fuzzy-search");
 
-const UserSchema = new Schema(
+const AdminSchema = new Schema(
   {
     email: {
       type: String,
@@ -16,54 +15,19 @@ const UserSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      index: "text",
     },
     lastName: {
       type: String,
       required: true,
       trim: true,
-    },
-    citizenshipId: {
-      type: String,
-      required: true,
-      trim: true,
-      index: true,
+      index: "text",
     },
     name: {
       type: String,
       required: true,
       trim: true,
       index: "text",
-      index: true,
-    },
-    imageFile: {
-      imageUrl: {
-        type: String,
-        trim: true,
-      },
-      imagePublicId: {
-        type: String,
-        trim: true,
-      },
-    },
-    frontCitizenshipFile: {
-      frontCitizenshipImage: {
-        type: String,
-        trim: true,
-      },
-      frontCitizenshipPublicId: {
-        type: String,
-        trim: true,
-      },
-    },
-    backCitizenshipFile: {
-      backCitizenshipImage: {
-        type: String,
-        trim: true,
-      },
-      backCitizenshipPublicId: {
-        type: String,
-        trim: true,
-      },
     },
     address: {
       type: String,
@@ -74,15 +38,7 @@ const UserSchema = new Schema(
     phoneNumber: {
       type: String,
       trim: true,
-      index: true,
-      unique: true,
       required: true,
-    },
-    isVerified: {
-      type: Boolean,
-      required: true,
-      default: false,
-      index: true,
     },
     hashed_password: {
       type: String,
@@ -102,17 +58,18 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.virtual("password")
+AdminSchema.virtual("password")
   .set(async function (password) {
     this.real_password = password;
     this.salt = await this.makeSalt();
+    this.randomValues = Math.round(new Date().valueOf() * Math.random()) + "";
     this.hashed_password = this.encryptPasswordFunc(password, this.salt);
   })
   .get(function () {
     return this.real_password;
   });
 
-UserSchema.methods = {
+AdminSchema.methods = {
   authentication(password) {
     const encrypt = this.encryptPasswordFunc(password, this.salt);
     if (!encrypt || !this.hashed_password) return false;
@@ -133,12 +90,5 @@ UserSchema.methods = {
   },
 };
 
-UserSchema.plugin(fuzzy, {
-  fields: {
-    name_tg: "name",
-  },
-});
-UserSchema.index({ name_tg: 1 });
-
-const User = mongoose.model("User", UserSchema);
-module.exports = User;
+const Admin = mongoose.model("Admin", AdminSchema);
+module.exports = Admin;

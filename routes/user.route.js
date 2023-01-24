@@ -4,6 +4,8 @@ const {
   deleteUser,
   patchUser,
   patchUserImage,
+  patchUserBackDocument,
+  patchUserFrontDocument,
 } = require("../controllers/user.controller");
 const {
   userRegisterController,
@@ -65,10 +67,31 @@ router.patch(
   validator,
   checkAuthValidation,
   uploadImages({
-    singleName: "userImage",
     folderName: "GISLandRegistration/userImage",
   }),
   patchUserImage
+);
+
+router.patch(
+  "/:userId/user-front-image",
+  validate(["userId"]),
+  validator,
+  checkAuthValidation,
+  uploadImages({
+    folderName: "GISLandRegistration/userDocument",
+  }),
+  patchUserFrontDocument
+);
+
+router.patch(
+  "/:userId/user-back-image",
+  validate(["userId"]),
+  validator,
+  checkAuthValidation,
+  uploadImages({
+    folderName: "GISLandRegistration/userDocument",
+  }),
+  patchUserBackDocument
 );
 
 router.patch(

@@ -20,17 +20,10 @@ exports.checkAuthValidation = async (req, res, next) => {
         const isCustomAuth = token.length < 500;
 
         const datas = jwt.decode(token);
+
         if (!datas) throw new SetErrorResponse("Invalid token");
 
         let user = await User.findOne({ _id: datas._id });
-        console.log(
-          "user authentication id: " +
-            req.params.userId +
-            " : " +
-            user._id +
-            " : " +
-            datas._id
-        );
 
         if (!user) {
           throw new SetErrorResponse(`User Not Found:`, 401);
@@ -43,7 +36,16 @@ exports.checkAuthValidation = async (req, res, next) => {
 
           if (res.locals.authData?._id) {
             const userId = res.locals.authData._id;
-            console.log(userId);
+            console.log(
+              "user authentication id: " +
+                req.params.userId +
+                " : " +
+                user._id +
+                " : " +
+                datas._id +
+                " : " +
+                userId
+            );
           }
         }
         if (!res.locals.authData || !res.locals?.authData?.success) {

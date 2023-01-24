@@ -56,18 +56,8 @@ exports.patchUserImage = async (req, res) => {
       req.files?.userImage?.length > 0
         ? req.files.userImage[0]?.location
         : undefined;
-    const frontCitizenshipImageLocation =
-      req.files?.frontCitizenshipImage?.length > 0
-        ? req.files.frontCitizenshipImage[0]?.location
-        : undefined;
-    const backCitizenshipImageLocation =
-      req.files?.backCitizenshipImage?.length > 0
-        ? req.files.backCitizenshipImage[0]?.location
-        : undefined;
 
     const editUserImageQuery = {};
-    var editFrontQuery = {};
-    var editBackQuery = {};
 
     if (userImageLocation) {
       editUserImageQuery.imageFile = {};
@@ -75,6 +65,49 @@ exports.patchUserImage = async (req, res) => {
       editUserImageQuery.imageFile.imagePublicId =
         req.files?.userImage[0]?.publicId;
     }
+
+    User.findById({ _id: userId })
+      .lean()
+      .then(async (res) => {
+        console.log(res.imageFile?.imagePublicId);
+        if (userImageLocation && res.imageFile?.imagePublicId) {
+          await deleteFileCloudinary(res.imageFile?.imagePublicId);
+        }
+      })
+      .catch((err) => {
+        throw new SetErrorResponse("Error deleting file cloudinary", 500);
+      });
+
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        ...editUserImageQuery,
+      },
+      { new: true }
+    ).lean();
+
+    if (userImageLocation && user?.imageFile?.imageUrl) {
+      deleteFileLocal({ imagePath: req.files.userImage[0]?.path });
+    }
+
+    if (!user) {
+      throw new SetErrorResponse("User not found"); // default (Not found,404)
+    }
+
+    return res.success({ userData: user }, "Success");
+  } catch (err) {
+    return res.fail(err);
+  }
+};
+
+exports.patchUserFrontDocument = async (req, res) => {
+  try {
+    const userId = res.locals.authData?._id;
+    const frontCitizenshipImageLocation =
+      req.files?.frontCitizenshipImage?.length > 0
+        ? req.files.frontCitizenshipImage[0]?.location
+        : undefined;
+
     if (frontCitizenshipImageLocation) {
       editFrontQuery = {
         frontCitizenshipFile: {},
@@ -84,6 +117,59 @@ exports.patchUserImage = async (req, res) => {
       editFrontQuery.frontCitizenshipFile.frontCitizenshipPublicId =
         req.files?.frontCitizenshipImage[0]?.publicId;
     }
+
+    User.findById({ _id: userId })
+      .lean()
+      .then(async (res) => {
+        console.log(res.frontCitizenshipFile?.frontCitizenshipPublicId);
+        if (
+          frontCitizenshipImageLocation &&
+          (await res.frontCitizenshipFile?.frontCitizenshipPublicId)
+        ) {
+          await deleteFileCloudinary(
+            res.frontCitizenshipFile?.frontCitizenshipPublicId
+          );
+        }
+      })
+      .catch((err) => {
+        throw new SetErrorResponse("Error deleting file cloudinary", 500);
+      });
+
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        ...editFrontQuery,
+      },
+      { new: true }
+    ).lean();
+
+    if (
+      frontCitizenshipImageLocation &&
+      user?.frontCitizenshipFile?.frontCitizenshipPublicId
+    ) {
+      deleteFileLocal({ imagePath: req.files.frontCitizenshipImage[0]?.path });
+    }
+
+    if (!user) {
+      throw new SetErrorResponse("User not found"); // default (Not found,404)
+    }
+
+    return res.success({ userData: user }, "Success");
+  } catch (err) {
+    res.fail(err);
+  }
+};
+
+exports.patchUserBackDocument = async (req, res) => {
+  try {
+    const userId = res.locals.authData?._id;
+    const backCitizenshipImageLocation =
+      req.files?.backCitizenshipImage?.length > 0
+        ? req.files.backCitizenshipImage[0]?.location
+        : undefined;
+
+    var editBackQuery = {};
+
     if (backCitizenshipImageLocation) {
       editBackQuery = {
         backCitizenshipFile: {},
@@ -97,18 +183,7 @@ exports.patchUserImage = async (req, res) => {
     User.findById({ _id: userId })
       .lean()
       .then(async (res) => {
-        console.log(res.imageFile?.imagePublicId);
-        if (userImageLocation && res.imageFile?.imagePublicId) {
-          await deleteFileCloudinary(res.imageFile?.imagePublicId);
-        }
-        if (
-          frontCitizenshipImageLocation &&
-          (await res.frontCitizenshipFile?.frontCitizenshipPublicId)
-        ) {
-          await deleteFileCloudinary(
-            res.frontCitizenshipFile?.frontCitizenshipPublicId
-          );
-        }
+        console.log(res.backCitizenshipFile?.backCitizenshipPublicId);
         if (
           backCitizenshipImageLocation &&
           res.backCitizenshipFile?.backCitizenshipPublicId
@@ -125,24 +200,11 @@ exports.patchUserImage = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { _id: userId },
       {
-        ...editUserImageQuery,
-        ...editFrontQuery,
         ...editBackQuery,
       },
       { new: true }
     ).lean();
 
-    console.log({ user });
-
-    if (userImageLocation && user?.imageFile?.imageUrl) {
-      deleteFileLocal({ imagePath: req.files.userImage[0]?.path });
-    }
-    if (
-      frontCitizenshipImageLocation &&
-      user?.frontCitizenshipFile?.frontCitizenshipPublicId
-    ) {
-      deleteFileLocal({ imagePath: req.files.frontCitizenshipImage[0]?.path });
-    }
     if (
       backCitizenshipImageLocation &&
       user?.backCitizenshipFile?.backCitizenshipPublicId
@@ -156,7 +218,7 @@ exports.patchUserImage = async (req, res) => {
 
     return res.success({ userData: user }, "Success");
   } catch (err) {
-    return res.fail(err);
+    res.fail(err);
   }
 };
 
