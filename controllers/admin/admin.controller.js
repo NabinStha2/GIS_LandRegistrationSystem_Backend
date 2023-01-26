@@ -54,7 +54,7 @@ exports.getAllUsersByAdmin = async (req, res) => {
 
 exports.patchAdminImage = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
+    const userId = req.params.userId;
     const userImageLocation =
       req.files?.userImage?.length > 0
         ? req.files.userImage[0]?.location
@@ -235,7 +235,7 @@ exports.patchAdminImage = async (req, res) => {
 
 exports.patchAdmin = async (req, res) => {
   try {
-    const userId = res.locals?.authData?._id;
+    const userId = req.params.userId;
     const { firstName, lastName, address, phoneNumber, citizenshipId } =
       req.body;
     const name = firstName + " " + lastName;
@@ -248,7 +248,6 @@ exports.patchAdmin = async (req, res) => {
         phoneNumber,
         address,
         name,
-        citizenshipId,
       },
       { new: true }
     ).lean();
@@ -265,7 +264,7 @@ exports.patchAdmin = async (req, res) => {
 
 exports.deleteAdmin = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
+    const userId = req.params.userId;
     const admin = await Admin.findByIdAndDelete({ _id: userId });
     if (!admin) {
       throw new SetErrorResponse("Admin not found"); // default (Not found,404)

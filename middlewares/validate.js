@@ -106,6 +106,109 @@ exports.validate = (params) => {
               .withMessage("UserID should be string value")
           );
           break;
+
+        case "parcelId":
+          result.push(
+            check("parcelId", "Parcel ID not Valid")
+              .notEmpty()
+              .isNumeric()
+              .withMessage("ParcelId should be numeric value")
+          );
+          break;
+
+        case "parcelId":
+          result.push(
+            check("parcelId", "Parcel ID not Valid")
+              .notEmpty()
+              .isInt()
+              .toInt()
+              .withMessage("ParcelId should be integer value")
+          );
+          break;
+
+        case "city":
+          result.push(
+            check("city", "City not Valid")
+              .notEmpty()
+              .isString()
+              .withMessage("City should be string value")
+          );
+          break;
+
+        case "area":
+          result.push(
+            check("area", "Area not Valid")
+              .notEmpty()
+              .isString()
+              .withMessage("Area should be string value")
+          );
+          break;
+
+        case "ownerUser":
+          result.push(
+            check("ownerUser", "Owner User must be mongoId")
+              .notEmpty()
+              .isMongoId()
+          );
+          break;
+
+        case "wardNo":
+          result.push(
+            check("wardNo", "WardNo not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("WardNo should be integer value")
+          );
+          break;
+
+        case "district":
+          result.push(
+            check("district", "District not Valid")
+              .notEmpty()
+              .isString()
+              .withMessage("District should be String value")
+          );
+          break;
+
+        case "province":
+          result.push(
+            check("province", "Province not Valid")
+              .notEmpty()
+              .isString()
+              .withMessage("Province should be String value")
+          );
+          break;
+
+        case "streetNo":
+          result.push(
+            check("streetNo", "StreetNo not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("StreetNo should be integer value")
+          );
+          break;
+
+        case "latitude":
+          result.push(
+            check("latitude", "Latitude not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("Latitude should be integer value")
+          );
+          break;
+
+        case "longitude":
+          result.push(
+            check("longitude", "Longitude not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("Longitude should be integer value")
+          );
+          break;
       }
     });
     return result;

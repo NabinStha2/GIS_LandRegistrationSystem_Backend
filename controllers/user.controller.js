@@ -56,7 +56,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.patchUserImage = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
+    const userId = req.params.userId;
     const userImageLocation =
       req.files?.userImage?.length > 0
         ? req.files.userImage[0]?.location
@@ -111,7 +111,7 @@ exports.patchUserImage = async (req, res) => {
 
 exports.patchUserFrontDocument = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
+    const userId = req.params.userId;
     const frontCitizenshipImageLocation =
       req.files?.frontCitizenshipImage?.length > 0
         ? req.files.frontCitizenshipImage[0]?.location
@@ -175,7 +175,7 @@ exports.patchUserFrontDocument = async (req, res) => {
 
 exports.patchUserBackDocument = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
+    const userId = req.params.userId;
     const backCitizenshipImageLocation =
       req.files?.backCitizenshipImage?.length > 0
         ? req.files.backCitizenshipImage[0]?.location
@@ -241,7 +241,7 @@ exports.patchUserBackDocument = async (req, res) => {
 
 exports.patchUser = async (req, res) => {
   try {
-    const userId = res.locals?.authData?._id;
+    const userId = req.params.userId;
     const { firstName, lastName, address, phoneNumber, citizenshipId } =
       req.body;
     const name = firstName + " " + lastName;

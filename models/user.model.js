@@ -84,6 +84,13 @@ const UserSchema = new Schema(
       index: true,
       enum: ["approved", "pending", "rejected"],
     },
+    ownedLand: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Land",
+        default: [],
+      },
+    ],
     hashed_password: {
       type: String,
       required: false,
