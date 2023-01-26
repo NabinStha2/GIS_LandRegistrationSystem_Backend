@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "description": "gis based land registration system",
   "main": "server.js",
-  "engines": {
-    "node": "18.x"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js",
+    "start": "node server.js",
+    "nodemon": "nodemon server.js",
     "swagger-autogen": "node ./helpers/swagger/swagger.js"
   },
   "author": "Nabin Stha",
