@@ -59,15 +59,17 @@ router.post(
   adminloginController
 );
 
+router.get("/users", checkAuthValidation, getAllUsersByAdmin);
+
+router.get("/lands", checkAuthValidation, getAllLandsByAdmin);
+
 router.get(
-  "/:userId",
+  "/user/:userId",
   validate(["userId"]),
   validator,
   checkAuthValidation,
   getAdmin
 );
-
-router.get("/", checkAuthValidation, getAllUsersByAdmin);
 
 router.patch(
   "/:userId/admin-image",
@@ -95,8 +97,5 @@ router.delete(
   checkAuthValidation,
   deleteAdmin
 );
-
-// Land
-router.get("/", checkAuthValidation, getAllLandsByAdmin);
 
 module.exports = router;

@@ -71,7 +71,7 @@ exports.adminVerifyOTPAndRegisterController = async (req, res, next) => {
       expiresIn: "2d",
     });
 
-    return res.success({ adminData, token });
+    return res.success({ adminData, token }, "Register successfully!");
   } catch (err) {
     return res.fail(err);
   }

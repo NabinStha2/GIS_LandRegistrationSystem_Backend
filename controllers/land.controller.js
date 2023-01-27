@@ -56,26 +56,45 @@ exports.createLand = async (req, res) => {
 // admin only
 exports.getAllLandsByAdmin = async (req, res) => {
   try {
-    const { page, limit, search = "", sort } = req.query;
+    const {
+      page,
+      limit,
+      search = "",
+      sort,
+      city,
+      district,
+      province,
+    } = req?.query;
+    let query = {};
+    if (city) {
+      query.city = { $regex: city, $options: "i" };
+    }
+    if (district) {
+      query.district = { $regex: district, $options: "i" };
+    }
+    if (province) {
+      query.province = { $regex: province, $options: "i" };
+    }
+    console.log(query);
+
     const lands = await getFuzzySearchPaginatedData({
       model: Land,
       reqQuery: {
         sort,
         page,
         limit,
+        query,
         pagination: true,
         modFunction: (document) => {
           return document;
         },
       },
       search: search,
-      isAdmin: true,
     });
 
     if (!lands) {
       throw new SetErrorResponse("User not found", 404);
     }
-
     return res.success({ landData: lands });
   } catch (err) {
     console.log(`Err get lands by admin : ${err}`);

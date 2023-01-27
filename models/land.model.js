@@ -18,11 +18,13 @@ const LandSchema = new Schema(
     latitude: {
       type: String,
       required: true,
+      index: true,
       trim: true,
     },
     longitude: {
       type: String,
       required: true,
+      index: true,
       trim: true,
     },
     parcelId: {
@@ -42,7 +44,7 @@ const LandSchema = new Schema(
       index: true,
       trim: true,
     },
-    streetNo: {
+    street: {
       type: String,
       required: true,
       trim: true,

@@ -48,6 +48,7 @@ exports.getAllUsersByAdmin = async (req, res) => {
 
     return res.success({ userData: users });
   } catch (err) {
+    console.log(`Error get users by admin: ${err.message}`);
     return res.fail(err);
   }
 };

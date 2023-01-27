@@ -27,11 +27,7 @@ exports.checkAuthValidation = async (req, res, next) => {
 
         // console.log(user);
 
-        if (
-          !user ||
-          user.isVerified == "pending" ||
-          user.isVerified == "rejected"
-        ) {
+        if (!user) {
           throw new SetErrorResponse(`User Not Found:`, 401);
         }
 
@@ -61,12 +57,13 @@ exports.checkAuthValidation = async (req, res, next) => {
             .send({ message: res?.locals?.authData?.message });
         }
       } catch (err) {
+        console.log(`Err auth validation :: ${err.message}`);
         throw err;
       }
     }
     next();
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     res.fail(error);
   }
 };
