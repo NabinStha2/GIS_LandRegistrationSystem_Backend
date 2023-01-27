@@ -1,5 +1,5 @@
 const Land = require("../models/land.model");
-const User = require("../models/user.model");
+const { getFuzzySearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.createLand = async (req, res) => {
@@ -48,7 +48,37 @@ exports.createLand = async (req, res) => {
 
     return res.success({ landData: newLand }, "land created successfully");
   } catch (err) {
-    console.log(err);
+    console.log(`Err add lands : ${err}`);
+    return res.fail(err);
+  }
+};
+
+// admin only
+exports.getAllLandsByAdmin = async (req, res) => {
+  try {
+    const { page, limit, search = "", sort } = req.query;
+    const lands = await getFuzzySearchPaginatedData({
+      model: Land,
+      reqQuery: {
+        sort,
+        page,
+        limit,
+        pagination: true,
+        modFunction: (document) => {
+          return document;
+        },
+      },
+      search: search,
+      isAdmin: true,
+    });
+
+    if (!lands) {
+      throw new SetErrorResponse("User not found", 404);
+    }
+
+    return res.success({ landData: lands });
+  } catch (err) {
+    console.log(`Err get lands by admin : ${err}`);
     return res.fail(err);
   }
 };

@@ -30,9 +30,9 @@ exports.getUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const { page, limit, search = "", sort } = req.query;
-    const users = await getFuzzySearchPaginatedData(
-      User,
-      {
+    const users = await getFuzzySearchPaginatedData({
+      model: User,
+      reqQuery: {
         sort,
         page,
         limit,
@@ -41,8 +41,8 @@ exports.getAllUsers = async (req, res) => {
           return document;
         },
       },
-      search
-    );
+      search: search,
+    });
 
     if (!users) {
       throw new SetErrorResponse("User not found", 404);

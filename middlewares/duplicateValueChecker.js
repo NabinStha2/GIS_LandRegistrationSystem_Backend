@@ -22,7 +22,7 @@ exports.checkDuplicateValue = (model, queries) => {
         $or: [
           { email: valueToCheck.email },
           {
-            phoneNumber: valueToCheck.password,
+            phoneNumber: valueToCheck.phoneNumber,
           },
         ],
       });

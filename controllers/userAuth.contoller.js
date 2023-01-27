@@ -11,6 +11,8 @@ exports.userRegisterController = async (req, res, next) => {
   try {
     const { email, firstName, lastName, phoneNumber, address, password } =
       req.body;
+
+      const existingUser = await User.findOne({ })
     const otp = generateOTP();
 
     const savingValues = {

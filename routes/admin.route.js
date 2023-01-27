@@ -19,6 +19,7 @@ const {
   deleteAdmin,
   getAllUsersByAdmin,
 } = require("../controllers/admin/admin.controller");
+const { getAllLandsByAdmin } = require("../controllers/land.controller");
 
 const router = require("express").Router();
 
@@ -79,28 +80,6 @@ router.patch(
   patchAdminImage
 );
 
-// router.patch(
-//   "/:userId/admin-front-image",
-//   validate(["userId"]),
-//   validator,
-//   checkAuthValidation,
-//   uploadImages({
-//     folderName: "GISLandRegistration/userDocument",
-//   }),
-//   patchAdminFrontDocument
-// );
-
-// router.patch(
-//   "/:userId/admin-back-image",
-//   validate(["userId"]),
-//   validator,
-//   checkAuthValidation,
-//   uploadImages({
-//     folderName: "GISLandRegistration/userDocument",
-//   }),
-//   patchAdminBackDocument
-// );
-
 router.patch(
   "/:userId",
   validate(["userId", "firstName", "lastName", "phoneNumber", "address"]),
@@ -116,5 +95,8 @@ router.delete(
   checkAuthValidation,
   deleteAdmin
 );
+
+// Land
+router.get("/", checkAuthValidation, getAllLandsByAdmin);
 
 module.exports = router;

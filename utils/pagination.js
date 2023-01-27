@@ -109,16 +109,12 @@ const getPaginatedDataCustom = async function (
         ? (await Promise.all(results.map(modFunction))).filter((data) => {
             return isAdmin
               ? data != null
-              : data != null &&
-                  data.isVerified != "pending" &&
-                  data.isVerified != "rejected";
+              : data != null && data.isVerified == "approved";
           })
         : results.map((data) => {
             return isAdmin
               ? data != null
-              : data != null &&
-                  data.isVerified != "pending" &&
-                  data.isVerified != "rejected";
+              : data != null && data.isVerified == "approved";
           }),
       paginated: "paginated",
     };
@@ -216,8 +212,7 @@ async function getSearchDocuments(
         ? data._searchScore >= 0.2 && !data.notSending
         : data._searchScore >= 0.2 &&
             !data.notSending &&
-            data.isVerified != "pending" &&
-            data.isVerified != "rejected";
+            data.isVerified == "approved";
     });
     const count = results?.length;
 
