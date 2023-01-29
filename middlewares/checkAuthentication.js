@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { customSecretKey } = require("../utils/customSecretKey");
 const User = require("../models/user.model");
 const { SetErrorResponse } = require("../utils/responseSetter");
+const Admin = require("../models/admin.model");
 
 exports.checkAuthValidation = async (req, res, next) => {
   let token;
@@ -23,26 +24,27 @@ exports.checkAuthValidation = async (req, res, next) => {
 
         if (!datas) throw new SetErrorResponse("Invalid token");
 
+        let admin = await Admin.findOne({ _id: datas._id });
         let user = await User.findOne({ _id: datas._id });
 
-        // console.log(user);
+        console.log(`admin :: ${admin} ---- user :: ${user}`);
 
-        if (!user) {
+        if (!admin && !user) {
           throw new SetErrorResponse(`User Not Found:`, 401);
         }
 
         if (token && isCustomAuth) {
           const data = jwt.verify(token, customSecretKey(datas._id));
           res.locals.authData = data;
+          res.locals.authData.isAdmin = admin ? true : false;
           res.locals.authData.success = true;
 
           if (res.locals.authData?._id) {
-            const userId = res.locals.authData._id;
+            const userId = res.locals.authData?._id;
             console.log(
               "user authentication id: " +
-                req.params.userId +
-                " : " +
-                user._id +
+                "params: " +
+                req.params.id +
                 " : " +
                 datas._id +
                 " : " +
@@ -51,7 +53,6 @@ exports.checkAuthValidation = async (req, res, next) => {
           }
         }
         if (!res.locals.authData || !res.locals?.authData?.success) {
-          console.log(res.locals.authData);
           return res
             .status(res?.locals?.authData?.status || 500)
             .send({ message: res?.locals?.authData?.message });

@@ -75,6 +75,7 @@ const LandSchema = new Schema(
     ownerUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     ownerHistory: [
       {

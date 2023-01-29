@@ -4,7 +4,7 @@ const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.createLand = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = res.locals.authData?._id;
     const {
       city,
       area,
@@ -108,7 +108,7 @@ exports.getAllLands = async (req, res) => {
 
 exports.deleteLand = async (req, res) => {
   try {
-    const landId = req.params.id;
+    const landId = res.locals.authData?._id;
     const land = await Land.findByIdAndDelete({ _id: landId });
     if (!land) {
       throw new SetErrorResponse("Land not found"); // default (Not found,404)
@@ -120,9 +120,51 @@ exports.deleteLand = async (req, res) => {
 };
 
 // only for admin ------------------------------------
+exports.landApprovedByAdmin = async (req, res) => {
+  try {
+    const landId = req.params?.id;
+    const land = await Land.findByIdAndUpdate(
+      { _id: landId },
+      {
+        isVerified: "approved",
+      },
+      { new: true }
+    ).lean();
+
+    return res.success({ landData: land }, "Land approved successfully");
+  } catch (err) {
+    return res.fail(err);
+  }
+};
+
+exports.landRejectedByAdmin = async (req, res) => {
+  try {
+    const landId = req.params?.id;
+
+    const existingLand = await Land.findById({ _id: landId }).lean();
+    if (existingLand?.isVerified == "approved") {
+      throw new SetErrorResponse(
+        "Already approved!,so cannot reject the land",
+        400
+      );
+    }
+    const land = await Land.findByIdAndUpdate(
+      { _id: landId },
+      {
+        isVerified: "rejected",
+      },
+      { new: true }
+    ).lean();
+
+    return res.success({ landData: land }, "Land rejected successfully");
+  } catch (err) {
+    return res.fail(err);
+  }
+};
+
 exports.patchLandByAdmin = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const landId = req.params?.id;
     const {
       city,
       area,
@@ -137,21 +179,24 @@ exports.patchLandByAdmin = async (req, res) => {
       longitude,
     } = req.body;
 
+    const existingLand = await Land.findById({ _id: landId }).lean();
+
+    // console.log(area, existingLand?.area);
+
     const land = await Land.findByIdAndUpdate(
-      { _id: userId },
+      { _id: landId },
       {
-        city,
-        area,
-        parcelId,
-        address,
-        wardNo,
-        province,
-        district,
-        latitude,
-        longitude,
-        landPrice,
-        ownerUserId: userId,
-        surveyNo,
+        city: city ?? existingLand.city,
+        area: area ?? existingLand.area,
+        parcelId: parcelId ?? existingLand?.parcelId,
+        address: address ?? existingLand.address,
+        wardNo: wardNo ?? existingLand.wardNo,
+        province: province ?? existingLand.province,
+        district: district ?? existingLand?.district,
+        latitude: latitude ?? existingLand.latitude,
+        longitude: longitude ?? existingLand.longitude,
+        landPrice: landPrice ?? existingLand.landPrice,
+        surveyNo: surveyNo ?? existingLand.surveyNo,
       },
       { new: true }
     ).lean();
@@ -177,6 +222,7 @@ exports.getAllLandsByAdmin = async (req, res) => {
       district,
       province,
     } = req?.query;
+
     let query = {};
     if (city) {
       query.city = { $regex: city, $options: "i" };

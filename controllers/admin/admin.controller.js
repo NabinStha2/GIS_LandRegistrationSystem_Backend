@@ -9,7 +9,7 @@ const { SetErrorResponse } = require("../../utils/responseSetter");
 
 exports.getAdmin = async (req, res) => {
   try {
-    const userId = req.params?.userId;
+    const userId = res.locals.authData?._id;
     const existingUser = await Admin.findById({ _id: userId }).lean();
 
     console.log(existingUser);
@@ -55,7 +55,7 @@ exports.getAllUsersByAdmin = async (req, res) => {
 
 exports.patchAdminImage = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const userImageLocation =
       req.files?.userImage?.length > 0
         ? req.files.userImage[0]?.location
@@ -236,7 +236,7 @@ exports.patchAdminImage = async (req, res) => {
 
 exports.patchAdmin = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const { firstName, lastName, address, phoneNumber, citizenshipId } =
       req.body;
     const name = firstName + " " + lastName;
@@ -265,7 +265,7 @@ exports.patchAdmin = async (req, res) => {
 
 exports.deleteAdmin = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const admin = await Admin.findByIdAndDelete({ _id: userId });
     if (!admin) {
       throw new SetErrorResponse("Admin not found"); // default (Not found,404)

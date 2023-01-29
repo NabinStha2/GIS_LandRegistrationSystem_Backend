@@ -20,6 +20,7 @@ const {
   getAllUsersByAdmin,
 } = require("../controllers/admin/admin.controller");
 const { getAllLandsByAdmin } = require("../controllers/land.controller");
+const { checkIsAdmin } = require("../middlewares/check.is.admin");
 
 const router = require("express").Router();
 
@@ -59,23 +60,23 @@ router.post(
   adminloginController
 );
 
-router.get("/users", checkAuthValidation, getAllUsersByAdmin);
-
-router.get("/lands", checkAuthValidation, getAllLandsByAdmin);
+router.get("/users", checkAuthValidation, checkIsAdmin, getAllUsersByAdmin);
 
 router.get(
   "/user/:id",
   validate(["id"]),
   validator,
   checkAuthValidation,
+  checkIsAdmin,
   getAdmin
 );
 
 router.patch(
-  "/:userId/admin-image",
-  validate(["userId"]),
+  "/:id/admin-image",
+  validate(["id"]),
   validator,
   checkAuthValidation,
+  checkIsAdmin,
   uploadImages({
     folderName: "GISLandRegistration/userImage",
   }),
@@ -83,18 +84,20 @@ router.patch(
 );
 
 router.patch(
-  "/:userId",
-  validate(["userId", "firstName", "lastName", "phoneNumber", "address"]),
+  "/:id",
+  validate(["id", "firstName", "lastName", "phoneNumber", "address"]),
   validator,
   checkAuthValidation,
+  checkIsAdmin,
   patchAdmin
 );
 
 router.delete(
-  "/:userId",
-  validate(["userId"]),
+  "/:id",
+  validate(["id"]),
   validator,
   checkAuthValidation,
+  checkIsAdmin,
   deleteAdmin
 );
 

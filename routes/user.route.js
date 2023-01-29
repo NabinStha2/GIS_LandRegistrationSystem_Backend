@@ -53,19 +53,13 @@ router.post(
   userloginController
 );
 
-router.get(
-  "/:userId",
-  validate(["userId"]),
-  validator,
-  checkAuthValidation,
-  getUser
-);
+router.get("/:id", validate(["id"]), validator, checkAuthValidation, getUser);
 
 router.get("/", checkAuthValidation, getAllUsers);
 
 router.patch(
-  "/:userId/user-image",
-  validate(["userId"]),
+  "/:id/user-image",
+  validate(["id"]),
   validator,
   checkAuthValidation,
   uploadImages({
@@ -75,8 +69,8 @@ router.patch(
 );
 
 router.patch(
-  "/:userId/user-front-image",
-  validate(["userId"]),
+  "/:id/user-front-image",
+  validate(["id"]),
   validator,
   checkAuthValidation,
   uploadImages({
@@ -86,8 +80,8 @@ router.patch(
 );
 
 router.patch(
-  "/:userId/user-back-image",
-  validate(["userId"]),
+  "/:id/user-back-image",
+  validate(["id"]),
   validator,
   checkAuthValidation,
   uploadImages({
@@ -97,8 +91,8 @@ router.patch(
 );
 
 router.patch(
-  "/:userId",
-  validate(["userId", "firstName", "lastName", "phoneNumber", "address"]),
+  "/:id",
+  validate(["id", "firstName", "lastName", "phoneNumber", "address"]),
   validator,
   checkAuthValidation,
   patchUser

@@ -8,16 +8,12 @@ const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.getUser = async (req, res) => {
   try {
-    const userId = req.params?.userId;
+    const userId = res.locals.authData?._id;
     const existingUser = await User.findById({ _id: userId }).lean();
 
     console.log(existingUser);
 
-    if (
-      !existingUser ||
-      existingUser.isVerified == "pending" ||
-      existingUser.isVerified == "rejected"
-    ) {
+    if (!existingUser) {
       throw new SetErrorResponse("User not found", 404);
     }
 
@@ -56,7 +52,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.patchUserImage = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const userImageLocation =
       req.files?.userImage?.length > 0
         ? req.files.userImage[0]?.location
@@ -111,7 +107,7 @@ exports.patchUserImage = async (req, res) => {
 
 exports.patchUserFrontDocument = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const frontCitizenshipImageLocation =
       req.files?.frontCitizenshipImage?.length > 0
         ? req.files.frontCitizenshipImage[0]?.location
@@ -175,7 +171,7 @@ exports.patchUserFrontDocument = async (req, res) => {
 
 exports.patchUserBackDocument = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const backCitizenshipImageLocation =
       req.files?.backCitizenshipImage?.length > 0
         ? req.files.backCitizenshipImage[0]?.location
@@ -225,11 +221,7 @@ exports.patchUserBackDocument = async (req, res) => {
       deleteFileLocal({ imagePath: req.files.backCitizenshipImage[0]?.path });
     }
 
-    if (
-      !user ||
-      user.isVerified == "pending" ||
-      user.isVerified == "rejected"
-    ) {
+    if (!user || user.isVerified != "approved") {
       throw new SetErrorResponse("User not found"); // default (Not found,404)
     }
 
@@ -241,7 +233,7 @@ exports.patchUserBackDocument = async (req, res) => {
 
 exports.patchUser = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = res.locals.authData?._id;
     const { firstName, lastName, address, phoneNumber, citizenshipId } =
       req.body;
     const name = firstName + " " + lastName;
@@ -259,11 +251,7 @@ exports.patchUser = async (req, res) => {
       { new: true }
     ).lean();
 
-    if (
-      !user ||
-      user.isVerified == "pending" ||
-      user.isVerified == "rejected"
-    ) {
+    if (!user) {
       throw new SetErrorResponse("User not found", 404);
     }
 

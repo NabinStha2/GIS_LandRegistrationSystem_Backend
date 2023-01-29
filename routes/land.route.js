@@ -3,7 +3,11 @@ const {
   getAllLands,
   patchLandByAdmin,
   deleteLand,
+  landApprovedByAdmin,
+  landRejectedByAdmin,
+  getAllLandsByAdmin,
 } = require("../controllers/land.controller");
+const { checkIsAdmin } = require("../middlewares/check.is.admin");
 const { checkAuthValidation } = require("../middlewares/checkAuthentication");
 const { validate } = require("../middlewares/validate");
 const { validator } = require("../utils/validator");
@@ -30,7 +34,36 @@ router.post(
   createLand
 );
 
-router.patch("/:id/edit-land", checkAuthValidation, patchLandByAdmin);
+//for admin only ----------------------------------------------------------------
+router.get("/admin", checkAuthValidation, checkIsAdmin, getAllLandsByAdmin);
+
+router.patch(
+  "/admin/:id/edit-land",
+  validate(["id"]),
+  validator,
+  checkAuthValidation,
+  checkIsAdmin,
+  patchLandByAdmin
+);
+
+router.patch(
+  "/admin/:id/approve-land",
+  validate(["id"]),
+  validator,
+  checkAuthValidation,
+  checkIsAdmin,
+  landApprovedByAdmin
+);
+
+router.patch(
+  "/admin/:id/reject-land",
+  validate(["id"]),
+  validator,
+  checkAuthValidation,
+  checkIsAdmin,
+  landRejectedByAdmin
+);
+//------------------------------------------------------------------
 
 router.delete("/:id", checkAuthValidation, deleteLand);
 

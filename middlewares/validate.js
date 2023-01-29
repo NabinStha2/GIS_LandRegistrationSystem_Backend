@@ -129,7 +129,6 @@ exports.validate = (params) => {
         case "area":
           result.push(
             check("area", "Area not Valid")
-              .notEmpty()
               .isString()
               .withMessage("Area should be string value")
           );
