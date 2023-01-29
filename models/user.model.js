@@ -77,13 +77,13 @@ const UserSchema = new Schema(
       unique: true,
       required: true,
     },
-    // isVerified: {
-    //   type: String,
-    //   required: true,
-    //   default: "pending",
-    //   index: true,
-    //   enum: ["approved", "pending", "rejected"],
-    // },
+    isVerified: {
+      type: String,
+      required: true,
+      default: "pending",
+      index: true,
+      enum: ["approved", "pending", "rejected"],
+    },
     ownedLand: [
       {
         type: mongoose.Schema.Types.ObjectId,

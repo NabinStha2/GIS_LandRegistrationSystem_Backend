@@ -12,7 +12,7 @@ exports.userRegisterController = async (req, res, next) => {
     const { email, firstName, lastName, phoneNumber, address, password } =
       req.body;
 
-      const existingUser = await User.findOne({ })
+    const existingUser = await User.findOne({});
     const otp = generateOTP();
 
     const savingValues = {
@@ -90,11 +90,7 @@ exports.userloginController = async (req, res, next) => {
       "+salt +hashed_password"
     );
     // console.log(existingUserData);
-    if (
-      !existingUserData ||
-      existingUserData.isVerified == "pending" ||
-      existingUserData.isVerified == "rejected"
-    ) {
+    if (!existingUserData) {
       throw new SetErrorResponse("User doesn't exist", 404);
     }
     if (!existingUserData?.authentication(password)) {

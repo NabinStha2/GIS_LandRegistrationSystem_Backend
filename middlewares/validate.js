@@ -27,7 +27,7 @@ exports.validate = (params) => {
               .notEmpty()
               .isString()
               .withMessage("Password should be in string form")
-              .isLength({ min: 8, max: 30 })
+              .isLength({ min: 6, max: 30 })
           );
           break;
 
@@ -35,10 +35,10 @@ exports.validate = (params) => {
           result.push(
             check(
               "firstName",
-              "First Name should be between 3 to 50 characters, it is required and should be string"
+              "First Name should be between 2 to 50 characters, it is required and should be string"
             )
               .notEmpty()
-              .isLength({ min: 3, max: 50 })
+              .isLength({ min: 2, max: 50 })
               .isString()
           );
           break;
@@ -47,10 +47,10 @@ exports.validate = (params) => {
           result.push(
             check(
               "lastName",
-              "Last Name should be between 3 to 50 characters, it is required and should be string"
+              "Last Name should be between 2 to 50 characters, it is required and should be string"
             )
               .notEmpty()
-              .isLength({ min: 3, max: 50 })
+              .isLength({ min: 2, max: 50 })
               .isString()
           );
           break;
@@ -71,9 +71,9 @@ exports.validate = (params) => {
           result.push(
             check(
               "address",
-              "Address should be between 5 to 50 characters and it should be string"
+              "Address should be between 2 to 50 characters and it should be string"
             )
-              .isLength({ min: 5, max: 50 })
+              .isLength({ min: 2, max: 50 })
               .isString()
               .optional()
           );
@@ -98,21 +98,12 @@ exports.validate = (params) => {
           );
           break;
 
-        case "userId":
+        case "id":
           result.push(
-            check("userId", "UserID not Valid")
+            check("id", "Id not Valid")
               .notEmpty()
               .isString()
-              .withMessage("UserID should be string value")
-          );
-          break;
-
-        case "parcelId":
-          result.push(
-            check("parcelId", "Parcel ID not Valid")
-              .notEmpty()
-              .isNumeric()
-              .withMessage("ParcelId should be numeric value")
+              .withMessage("Id should be string value")
           );
           break;
 
@@ -144,9 +135,9 @@ exports.validate = (params) => {
           );
           break;
 
-        case "ownerUser":
+        case "ownerUserId":
           result.push(
-            check("ownerUser", "Owner User must be mongoId")
+            check("ownerUserId", "Owner User must be mongoId")
               .notEmpty()
               .isMongoId()
           );
@@ -180,16 +171,6 @@ exports.validate = (params) => {
           );
           break;
 
-        case "streetNo":
-          result.push(
-            check("streetNo", "StreetNo not Valid")
-              .notEmpty()
-              .toInt()
-              .isInt()
-              .withMessage("StreetNo should be integer value")
-          );
-          break;
-
         case "latitude":
           result.push(
             check("latitude", "Latitude not Valid")
@@ -209,11 +190,30 @@ exports.validate = (params) => {
               .withMessage("Longitude should be integer value")
           );
           break;
+
+        case "surveyNo":
+          result.push(
+            check("surveyNo", "SurveyNo not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("SurveyNo should be integer value")
+          );
+          break;
+
+        case "landPrice":
+          result.push(
+            check("landPrice", "LandPrice not Valid")
+              .notEmpty()
+              .toInt()
+              .isInt()
+              .withMessage("LandPrice should be integer value")
+          );
+          break;
       }
     });
     return result;
   } catch (error) {
     console.log(error);
-    // errorHandler({ res, error, message: "Validation Related Errors" });
   }
 };

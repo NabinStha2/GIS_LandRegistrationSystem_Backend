@@ -44,7 +44,12 @@ const LandSchema = new Schema(
       index: true,
       trim: true,
     },
-    street: {
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    surveyNo: {
       type: String,
       required: true,
       trim: true,
@@ -55,6 +60,11 @@ const LandSchema = new Schema(
       index: true,
       trim: true,
     },
+    landPrice: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     isVerified: {
       type: String,
       required: true,
@@ -62,7 +72,7 @@ const LandSchema = new Schema(
       index: true,
       enum: ["approved", "pending", "rejected"],
     },
-    ownerUser: {
+    ownerUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

@@ -64,8 +64,8 @@ router.get("/users", checkAuthValidation, getAllUsersByAdmin);
 router.get("/lands", checkAuthValidation, getAllLandsByAdmin);
 
 router.get(
-  "/user/:userId",
-  validate(["userId"]),
+  "/user/:id",
+  validate(["id"]),
   validator,
   checkAuthValidation,
   getAdmin
