@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const fuzzy = require("../utils/mongoose-fuzzy-search");
 
 const LandSaleSchema = new mongoose.Schema({
   landId: {
@@ -7,7 +8,12 @@ const LandSaleSchema = new mongoose.Schema({
     index: true,
     ref: "Land",
   },
-  userId: {
+  parcelId: {
+    type: String,
+    required: true,
+    index: true,
+  },
+  ownerUserId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     index: true,
@@ -15,22 +21,20 @@ const LandSaleSchema = new mongoose.Schema({
   },
   saleData: {
     type: String,
-    default: "pending",
-    enum: ["pending", "approved"],
+    default: "selling",
+    enum: ["selling", "selled"],
     index: true,
     required: true,
   },
   prevOwnerUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    index: true,
     ref: "User",
   },
 });
 
 LandSaleSchema.plugin(fuzzy, {
   fields: {
-    name_tg: "landId",
+    name_tg: "parcelId",
   },
 });
 LandSaleSchema.index({ name_tg: 1 });

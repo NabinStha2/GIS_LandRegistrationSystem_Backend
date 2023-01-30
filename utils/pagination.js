@@ -130,13 +130,17 @@ async function getSearchDocuments({
     if (!modFunction) {
       throw new SetErrorResponse(500, "Search needs mod function");
     }
+
     let results = await Promise.all(
       // await model
       //   .fuzzy(search)
       //   .skip(cursor)
       //   .limit(limit + 1)
       (
-        await model.fuzzy(search).skip(skipping).limit(limit)
+        await model
+          .fuzzy(search)
+          .skip(skipping)
+          .limit(limit)
       ).map(async (item) => {
         const modItem = await modFunction(item.document);
         return {
@@ -226,22 +230,33 @@ const getPaginatedDataCustom = async function ({
           .select(select)
           .lean(lean);
 
-    const count = await model?.count(query);
+    let res;
+    let data;
 
-    // let data = await Promise.all(
-    //   results.filter((x) => {
-    //     return false;
-    //   })
-    // );
+    if (modFunction) {
+      res = await model
+        ?.find(query)
+        .sort(sort || "_id")
+        .populate(populate || "")
+        .select(select)
+        .lean(lean);
+      data = (await Promise.all(res.map(modFunction))).filter(
+        (data) => data != null
+      );
+    } else {
+      data = await model?.count(query);
+    }
+
+    console.log(`paginated data length :: ${data.length}`);
 
     return {
-      count,
-      totalPages: Math.ceil(count / limit),
+      count: data.length,
+      totalPages: Math.ceil(data.length / limit),
       currentPageNumber: page,
       results: modFunction
-        ? (await Promise.all(results.map(modFunction))).filter(
-            (data) => data != null
-          )
+        ? (await Promise.all(results.map(modFunction))).filter((data) => {
+            return data != null;
+          })
         : results,
     };
   } catch (err) {
