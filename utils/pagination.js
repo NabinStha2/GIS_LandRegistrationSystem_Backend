@@ -56,10 +56,9 @@ const { SetErrorResponse } = require("./responseSetter.js");
 //   }
 // };
 
-exports.getFuzzySearchPaginatedData = async function ({
+exports.getSearchPaginatedData = async function ({
   model,
   reqQuery,
-  search,
   select = "+_id",
 }) {
   try {
@@ -74,126 +73,28 @@ exports.getFuzzySearchPaginatedData = async function ({
       sort,
       modFunction,
     } = reqQuery;
-    return search
-      ? getSearchDocuments({
-          model: model,
-          search: search,
-          select: select,
-          pagination,
-          limit,
-          page,
-          cursor,
-          sort,
-          query,
-          populate,
-          modFunction: modFunction,
-        })
-      : getPaginatedDataCustom({
-          model: model,
-          reqQuery: {
-            query,
-            cursor,
-            page,
-            limit,
-            pagination,
-            populate,
-            lean,
-            sort,
-            modFunction,
-          },
-          select: select,
-        });
+
+    return getPaginatedData({
+      model: model,
+      reqQuery: {
+        query,
+        cursor,
+        page,
+        limit,
+        pagination,
+        populate,
+        lean,
+        sort,
+        modFunction,
+      },
+      select: select,
+    });
   } catch (err) {
     throw err;
   }
 };
 
-async function getSearchDocuments({
-  model,
-  search,
-  select = "_id",
-  limit,
-  page,
-  pagination,
-  query,
-  sort,
-  cursor,
-  populate,
-  modFunction,
-}) {
-  try {
-    page = page && page > 0 ? parseInt(page) : 1;
-    limit = limit && limit > 0 ? parseInt(limit) : 25;
-    const skipping = (page - 1) * limit;
-    // cursor = cursor ? parseInt(cursor) : 0;
-
-    if (!modFunction) {
-      throw new SetErrorResponse(500, "Search needs mod function");
-    }
-
-    let results = await Promise.all(
-      // await model
-      //   .fuzzy(search)
-      //   .skip(cursor)
-      //   .limit(limit + 1)
-      (
-        await model
-          .fuzzy(search)
-          .skip(skipping)
-          .limit(limit)
-      ).map(async (item) => {
-        const modItem = await modFunction(item.document);
-        return {
-          ...modItem,
-          _searchScore: item.similarity,
-        };
-      })
-    );
-
-    results = results.filter((data) => {
-      return data._searchScore >= 0.2 && !data.notSending;
-    });
-
-    // const getNewCursor = () => {
-    //   if (results.length === limit + 1) {
-    //     results.pop();
-    //     return cursor + limit;
-    //   }
-    //   return null;
-    // };
-    // const next = pagination ? getNewCursor() : null;
-    // const previous = pagination ? cursor - limit : null;
-    // const count = await model?.count(query);
-
-    let res = await Promise.all(
-      (
-        await model.fuzzy(search)
-      ).map(async (item) => {
-        const modItem = await modFunction(item.document);
-        return {
-          ...modItem,
-          _searchScore: item.similarity,
-        };
-      })
-    );
-    const count = res.filter((data) => {
-      return data._searchScore >= 0.2 && !data.notSending;
-    }).length;
-
-    return {
-      // previous: pagination ? (previous < 0 ? null : previous) : null,
-      // next,
-      count,
-      totalPages: Math.ceil(count / limit),
-      currentPageNumber: page,
-      results,
-    };
-  } catch (err) {
-    throw err;
-  }
-}
-
-const getPaginatedDataCustom = async function ({
+const getPaginatedData = async function ({
   model,
   reqQuery,
   select = "+_id",
@@ -263,3 +164,88 @@ const getPaginatedDataCustom = async function ({
     throw err;
   }
 };
+
+// async function getSearchDocuments({
+//   model,
+//   search,
+//   select = "_id",
+//   limit,
+//   page,
+//   pagination,
+//   query,
+//   sort,
+//   cursor,
+//   populate,
+//   modFunction,
+// }) {
+//   try {
+//     page = page && page > 0 ? parseInt(page) : 1;
+//     limit = limit && limit > 0 ? parseInt(limit) : 25;
+//     const skipping = (page - 1) * limit;
+//     // cursor = cursor ? parseInt(cursor) : 0;
+
+//     if (!modFunction) {
+//       throw new SetErrorResponse(500, "Search needs mod function");
+//     }
+
+//     let results = await Promise.all(
+//       // await model
+//       //   .fuzzy(search)
+//       //   .skip(cursor)
+//       //   .limit(limit + 1)
+//       (
+//         await model
+//           .fuzzy(search)
+//           .skip(skipping)
+//           .limit(limit)
+//       ).map(async (item) => {
+//         const modItem = await modFunction(item.document);
+//         return {
+//           ...modItem,
+//           _searchScore: item.similarity,
+//         };
+//       })
+//     );
+
+//     results = results.filter((data) => {
+//       return data._searchScore >= 0.2 && !data.notSending;
+//     });
+
+//     // const getNewCursor = () => {
+//     //   if (results.length === limit + 1) {
+//     //     results.pop();
+//     //     return cursor + limit;
+//     //   }
+//     //   return null;
+//     // };
+//     // const next = pagination ? getNewCursor() : null;
+//     // const previous = pagination ? cursor - limit : null;
+//     // const count = await model?.count(query);
+
+//     let res = await Promise.all(
+//       (
+//         await model.fuzzy(search)
+//       ).map(async (item) => {
+//         const modItem = await modFunction(item.document);
+//         return {
+//           ...modItem,
+//           _searchScore: item.similarity,
+//         };
+//       })
+//     );
+//     const count = res.filter((data) => {
+//       return data._searchScore >= 0.2 && !data.notSending;
+//     }).length;
+
+//     return {
+//       // previous: pagination ? (previous < 0 ? null : previous) : null,
+//       // next,
+//       count,
+//       totalPages: Math.ceil(count / limit),
+//       currentPageNumber: page,
+//       results,
+//     };
+//   } catch (err) {
+//     throw err;
+//   }
+// }

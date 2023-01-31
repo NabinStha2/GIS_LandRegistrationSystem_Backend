@@ -19,8 +19,6 @@ router.post(
 
 router.get(
   "/",
-  validate(["id"]),
-  validator,
   checkAuthValidation,
   getAllLandSale
 );

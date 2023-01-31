@@ -1,6 +1,6 @@
 const Land = require("../models/land.model");
 const LandSale = require("../models/land.sale.model");
-const { getFuzzySearchPaginatedData } = require("../utils/pagination");
+const { getSearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 module.exports.addLandForSale = async (req, res) => {
@@ -45,6 +45,9 @@ module.exports.getAllLandSale = async (req, res) => {
       province,
     } = req?.query;
     let query = [];
+    if (search) {
+      query.push({ parcelId: { $regex: search, $options: "i" } });
+    }
     if (city) {
       query.push({ city: { $regex: city, $options: "i" } });
     }
@@ -57,7 +60,7 @@ module.exports.getAllLandSale = async (req, res) => {
     query.push({ isVerified: "approved" });
     console.log(query);
 
-    const landSale = await getFuzzySearchPaginatedData({
+    const landSale = await getSearchPaginatedData({
       model: LandSale,
       reqQuery: {
         sort,
@@ -69,20 +72,11 @@ module.exports.getAllLandSale = async (req, res) => {
         },
         pagination: true,
         modFunction: async (document) => {
-          if (search) {
-            let data = await LandSale.find({
-              landId: document.landId,
-            })
-              .populate({ path: "landId" })
-              .lean();
-            return data;
-          }
           if (document.landId != null) {
             return document;
           }
         },
       },
-      search: search,
     });
 
     if (!landSale) {

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const fuzzy = require("../utils/mongoose-fuzzy-search");
+const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 
 const LandSchema = new Schema(
   {
@@ -30,8 +30,8 @@ const LandSchema = new Schema(
     parcelId: {
       type: String,
       required: true,
-      index: true,
       trim: true,
+      index: true,
     },
     wardNo: {
       type: String,
@@ -47,6 +47,7 @@ const LandSchema = new Schema(
     address: {
       type: String,
       required: true,
+      index: true,
       trim: true,
     },
     surveyNo: {
@@ -88,12 +89,7 @@ const LandSchema = new Schema(
   { timestamps: true }
 );
 
-LandSchema.plugin(fuzzy, {
-  fields: {
-    name_tg: "parcelId",
-  },
-});
-LandSchema.index({ name_tg: 1 });
+// LandSchema.plugin(mongoose_fuzzy_searching, { fields: ["parcelId"] });
 
 const Land = mongoose.model("Land", LandSchema);
 module.exports = Land;

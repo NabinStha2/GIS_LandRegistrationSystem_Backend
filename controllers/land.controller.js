@@ -1,5 +1,5 @@
 const Land = require("../models/land.model");
-const { getFuzzySearchPaginatedData } = require("../utils/pagination");
+const { getSearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.createLand = async (req, res) => {
@@ -69,6 +69,9 @@ exports.getAllLands = async (req, res) => {
       province,
     } = req?.query;
     let query = {};
+    if (search) {
+      query.parcelId = { $regex: search, $options: "i" };
+    }
     if (city) {
       query.city = { $regex: city, $options: "i" };
     }
@@ -81,7 +84,7 @@ exports.getAllLands = async (req, res) => {
     query.isVerified = "approved";
     console.log(query);
 
-    const lands = await getFuzzySearchPaginatedData({
+    const lands = await getSearchPaginatedData({
       model: Land,
       reqQuery: {
         sort,
@@ -181,22 +184,22 @@ exports.patchLandByAdmin = async (req, res) => {
 
     const existingLand = await Land.findById({ _id: landId }).lean();
 
-    // console.log(area, existingLand?.area);
+    console.log(parcelId, existingLand?.area);
 
     const land = await Land.findByIdAndUpdate(
       { _id: landId },
       {
-        city: city ?? existingLand.city,
-        area: area ?? existingLand.area,
-        parcelId: parcelId ?? existingLand?.parcelId,
-        address: address ?? existingLand.address,
-        wardNo: wardNo ?? existingLand.wardNo,
-        province: province ?? existingLand.province,
-        district: district ?? existingLand?.district,
-        latitude: latitude ?? existingLand.latitude,
-        longitude: longitude ?? existingLand.longitude,
-        landPrice: landPrice ?? existingLand.landPrice,
-        surveyNo: surveyNo ?? existingLand.surveyNo,
+        city: city || existingLand.city,
+        area: area || existingLand.area,
+        parcelId: parcelId || existingLand?.parcelId,
+        address: address || existingLand.address,
+        wardNo: wardNo || existingLand.wardNo,
+        province: province || existingLand.province,
+        district: district || existingLand?.district,
+        latitude: latitude || existingLand.latitude,
+        longitude: longitude || existingLand.longitude,
+        landPrice: landPrice || existingLand.landPrice,
+        surveyNo: surveyNo || existingLand.surveyNo,
       },
       { new: true }
     ).lean();
@@ -207,6 +210,7 @@ exports.patchLandByAdmin = async (req, res) => {
 
     return res.success({ landData: land }, "Land updated");
   } catch (err) {
+    console.log(`Err :: ${err.message}`);
     return res.fail(err);
   }
 };
@@ -224,6 +228,9 @@ exports.getAllLandsByAdmin = async (req, res) => {
     } = req?.query;
 
     let query = {};
+    if (search) {
+      query.parcelId = { $regex: search, $options: "i" };
+    }
     if (city) {
       query.city = { $regex: city, $options: "i" };
     }
@@ -235,7 +242,7 @@ exports.getAllLandsByAdmin = async (req, res) => {
     }
     console.log(query);
 
-    const lands = await getFuzzySearchPaginatedData({
+    const lands = await getSearchPaginatedData({
       model: Land,
       reqQuery: {
         sort,

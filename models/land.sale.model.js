@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const fuzzy = require("../utils/mongoose-fuzzy-search");
 
 const LandSaleSchema = new mongoose.Schema({
   landId: {
@@ -31,13 +30,6 @@ const LandSaleSchema = new mongoose.Schema({
     ref: "User",
   },
 });
-
-LandSaleSchema.plugin(fuzzy, {
-  fields: {
-    name_tg: "parcelId",
-  },
-});
-LandSaleSchema.index({ name_tg: 1 });
 
 const LandSale = mongoose.model("LandSale", LandSaleSchema);
 module.exports = LandSale;

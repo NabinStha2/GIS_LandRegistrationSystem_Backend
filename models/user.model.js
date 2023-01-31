@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const crypto = require("crypto");
-const fuzzy = require("../utils/mongoose-fuzzy-search");
 
 const UserSchema = new Schema(
   {
@@ -139,13 +138,6 @@ UserSchema.methods = {
     return salt;
   },
 };
-
-UserSchema.plugin(fuzzy, {
-  fields: {
-    name_tg: "name",
-  },
-});
-UserSchema.index({ name_tg: 1 });
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

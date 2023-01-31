@@ -3,7 +3,7 @@ const {
   deleteFileLocal,
   deleteFileCloudinary,
 } = require("../utils/fileHandling");
-const { getFuzzySearchPaginatedData } = require("../utils/pagination");
+const { getSearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.getUser = async (req, res) => {
@@ -26,18 +26,25 @@ exports.getUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const { page, limit, search = "", sort } = req.query;
-    const users = await getFuzzySearchPaginatedData({
+
+    let query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+    console.log(query);
+
+    const users = await getSearchPaginatedData({
       model: User,
       reqQuery: {
         sort,
         page,
         limit,
+        query,
         pagination: true,
         modFunction: (document) => {
           return document;
         },
       },
-      search: search,
     });
 
     if (!users) {
