@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 
 const LandSchema = new Schema(
   {

@@ -94,6 +94,19 @@ module.exports.deleteLandSale = async (req, res) => {
   try {
     const landSaleId = req.params.id;
 
+    if (!res.locals.authData.isAdmin) {
+      const existingLandSale = await LandSale.findById({ _id: landSaleId })
+        .populate({ path: "landId" })
+        .lean();
+
+      if (existingLandSale?.landId?.ownerUserId != res.locals.authData?._id) {
+        throw new SetErrorResponse(
+          "Not authorized for current user to delete land for sale",
+          401
+        );
+      }
+    }
+
     const landSale = await LandSale.findByIdAndDelete({
       _id: landSaleId,
     }).lean();
