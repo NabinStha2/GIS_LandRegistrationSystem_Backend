@@ -1,10 +1,12 @@
 const Land = require("../models/land.model");
+const User = require("../models/user.model");
 const { getSearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
 exports.createLand = async (req, res) => {
   try {
     const userId = res.locals.authData?._id;
+
     const {
       city,
       area,
@@ -111,7 +113,21 @@ exports.getAllLands = async (req, res) => {
 
 exports.deleteLand = async (req, res) => {
   try {
-    const landId = res.locals.authData?._id;
+    const landId = req.params.id;
+
+    if (!res.locals.authData.isAdmin) {
+      const existingLand = await LandSale.findById({ _id: landId })
+        .populate({ path: "landId" })
+        .lean();
+
+      if (existingLand?.ownerUserId != res.locals.authData?._id) {
+        throw new SetErrorResponse(
+          "Not authorized for current user to delete land",
+          401
+        );
+      }
+    }
+
     const land = await Land.findByIdAndDelete({ _id: landId });
     if (!land) {
       throw new SetErrorResponse("Land not found"); // default (Not found,404)

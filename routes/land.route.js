@@ -8,6 +8,9 @@ const {
   getAllLandsByAdmin,
 } = require("../controllers/land.controller");
 const { checkIsAdmin } = require("../middlewares/check.is.admin");
+const {
+  checkIsUserVerified,
+} = require("../middlewares/check.is.user.verified");
 const { checkAuthValidation } = require("../middlewares/checkAuthentication");
 const { validate } = require("../middlewares/validate");
 const { validator } = require("../utils/validator");
@@ -31,6 +34,7 @@ router.post(
   ]),
   validator,
   checkAuthValidation,
+  checkIsUserVerified,
   createLand
 );
 

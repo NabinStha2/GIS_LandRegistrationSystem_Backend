@@ -60,6 +60,29 @@ exports.getAllUsersByAdmin = async (req, res) => {
   }
 };
 
+exports.approveUserByAdmin = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findByIdAndUpdate(
+      { _id: userId },
+      {
+        isVerified: "approved",
+      },
+      { new: true }
+    ).lean();
+
+    if (!user) {
+      throw new SetErrorResponse("User not found", 404);
+    }
+
+    return res.success({ userData: user }, "User has been approved");
+  } catch (err) {
+    console.log(`Error from approveUserByAdmin: ${err}`);
+    return res.fail(err);
+  }
+};
+
 exports.patchAdminImage = async (req, res) => {
   try {
     const userId = res.locals.authData?._id;

@@ -91,7 +91,7 @@ router.patch(
 );
 
 router.patch(
-  "/:id",
+  "/:id/update-user",
   validate(["id", "firstName", "lastName", "phoneNumber", "address"]),
   validator,
   checkAuthValidation,

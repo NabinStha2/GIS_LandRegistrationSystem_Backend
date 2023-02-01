@@ -5,6 +5,7 @@ const {
 } = require("../controllers/admin/adminAuth.controller");
 const { checkAuthValidation } = require("../middlewares/checkAuthentication");
 const { checkDuplicateValue } = require("../middlewares/duplicateValueChecker");
+const { checkIsAdmin } = require("../middlewares/check.is.admin");
 const { uploadImages } = require("../middlewares/multer");
 const { validate } = require("../middlewares/validate");
 const { validator } = require("../utils/validator");
@@ -18,9 +19,8 @@ const {
   patchAdmin,
   deleteAdmin,
   getAllUsersByAdmin,
+  approveUserByAdmin,
 } = require("../controllers/admin/admin.controller");
-const { getAllLandsByAdmin } = require("../controllers/land.controller");
-const { checkIsAdmin } = require("../middlewares/check.is.admin");
 
 const router = require("express").Router();
 
@@ -69,6 +69,15 @@ router.get(
   checkAuthValidation,
   checkIsAdmin,
   getAdmin
+);
+
+router.patch(
+  "/:id/approve-user",
+  validate(["id"]),
+  validator,
+  checkAuthValidation,
+  checkIsAdmin,
+  approveUserByAdmin
 );
 
 router.patch(
