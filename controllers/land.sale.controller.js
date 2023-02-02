@@ -74,6 +74,7 @@ module.exports.getAllLandSale = async (req, res) => {
         },
         pagination: true,
         modFunction: async (document) => {
+          // console.log(`document :: ${document}`);
           if (document.landId != null) {
             return document;
           }
