@@ -1,6 +1,7 @@
 const Land = require("../models/land.model");
 const LandSale = require("../models/land.sale.model");
 const TransferOwnership = require("../models/transfer.ownership.model");
+const User = require("../models/user.model");
 const { getSearchPaginatedData } = require("../utils/pagination");
 const { SetErrorResponse } = require("../utils/responseSetter");
 
@@ -69,6 +70,14 @@ module.exports.getAllLandForTransferOwnership = async (req, res) => {
 module.exports.addLandForTransferOwnership = async (req, res) => {
   try {
     const landSaleId = req.params.id;
+
+    const existingTransfer = await TransferOwnership.findOne({
+      landSaleId: landSaleId,
+    }).lean();
+    if (existingTransfer) {
+      throw new SetErrorResponse("Already exist", 403);
+    }
+
     const landSale = await LandSale.findById({ _id: landSaleId })
       .populate({ path: "landId ownerUserId" })
       .lean();
@@ -106,7 +115,6 @@ module.exports.addLandForTransferOwnership = async (req, res) => {
 module.exports.approveLandForTransferOwnership = async (req, res) => {
   try {
     const transferOwnershipId = req.params.id;
-    console.log(transferOwnershipId);
     const transferOwnership = await TransferOwnership.findById({
       _id: transferOwnershipId,
     })
@@ -121,45 +129,57 @@ module.exports.approveLandForTransferOwnership = async (req, res) => {
     if (!transferOwnership) {
       throw new SetErrorResponse("TransferOwnership not found", 404);
     }
-    // if (transferOwnership?.ownerUserId._id != res.locals.authData?._id) {
-    //   throw new SetErrorResponse(
-    //     "User have no permission to approve land for transfer",
-    //     401
-    //   );
-    // }
+    if (transferOwnership?.ownerUserId._id != res.locals.authData?._id) {
+      throw new SetErrorResponse(
+        "User have no permission to approve land for transfer",
+        401
+      );
+    }
 
     let ownerHistory = [];
+    let land = [];
     ownerHistory.push(res.locals.authData?._id);
+    land.push(transferOwnership?.landSaleId?.landId?._id);
 
-    const [updatedLand, updatedLandSale, updatedTransferOwnership] =
-      await Promise.all([
-        Land.findByIdAndUpdate(
-          { _id: transferOwnership?.landSaleId?.landId?._id },
-          {
-            ownerUserId: transferOwnership?.approvedUserId,
-            ownerHistory: [...ownerHistory],
-          },
-          { new: true }
-        ).lean(),
-        LandSale.findByIdAndUpdate(
-          { _id: transferOwnership?.landSaleId?._id },
-          {
-            ownerUserId: transferOwnership?.approvedUserId,
-            prevOwnerUserId: res.locals.authData?._id,
-            saleData: "selled",
-          },
-          { new: true }
-        ).lean(),
-        TransferOwnership.findByIdAndUpdate(
-          {
-            _id: transferOwnershipId,
-          },
-          {
-            ownerUserId: transferOwnership?.approvedUserId,
-          },
-          { new: true }
-        ).lean(),
-      ]);
+    const [
+      updatedUser,
+      updatedLand,
+      updatedLandSale,
+      updatedTransferOwnership,
+    ] = await Promise.all([
+      User.findByIdAndUpdate(
+        { _id: res.locals.authData?._id },
+        { ownedLand: [...land] },
+        { new: true }
+      ).lean(),
+      Land.findByIdAndUpdate(
+        { _id: transferOwnership?.landSaleId?.landId?._id },
+        {
+          ownerUserId: transferOwnership?.approvedUserId,
+          ownerHistory: [...ownerHistory],
+        },
+        { new: true }
+      ).lean(),
+      LandSale.findByIdAndUpdate(
+        { _id: transferOwnership?.landSaleId?._id },
+        {
+          ownerUserId: transferOwnership?.approvedUserId,
+          prevOwnerUserId: res.locals.authData?._id,
+          saleData: "selled",
+        },
+        { new: true }
+      ).lean(),
+      TransferOwnership.findByIdAndUpdate(
+        {
+          _id: transferOwnershipId,
+        },
+        {
+          transerData: "approved",
+          ownerUserId: transferOwnership?.approvedUserId,
+        },
+        { new: true }
+      ).lean(),
+    ]);
 
     // const updatedLand = await Land.findByIdAndUpdate(
     //   { _id: transferOwnership?.landSaleId?.landId },
@@ -196,10 +216,67 @@ module.exports.approveLandForTransferOwnership = async (req, res) => {
 
     return res.success(
       { transferOwnershipData: updatedTransferOwnership },
-      "Land added for transfer"
+      "Land approved for transfer"
     );
   } catch (err) {
     console.log(`Error from approveLandForTransferOwnership : ${err}`);
+    return res.fail(err);
+  }
+};
+
+module.exports.rejectLandForTransferOwnership = async (req, res) => {
+  try {
+    const transferOwnershipId = req.params.id;
+    const transferOwnership = await TransferOwnership.findById({
+      _id: transferOwnershipId,
+    })
+      .populate({
+        path: "landSaleId",
+        populate: {
+          path: "landId ownerUserId",
+        },
+      })
+      .lean();
+
+    if (!transferOwnership) {
+      throw new SetErrorResponse("TransferOwnership not found", 404);
+    }
+    if (transferOwnership?.ownerUserId._id != res.locals.authData?._id) {
+      throw new SetErrorResponse(
+        "User have no permission to approve land for transfer",
+        401
+      );
+    }
+
+    let rejectedUserId = [];
+    rejectedUserId.push(transferOwnership?.approvedUserId);
+
+    const [updatedLand, updatedLandSale, updatedTransferOwnership] =
+      await Promise.all([
+        LandSale.findByIdAndUpdate(
+          { _id: transferOwnership?.landSaleId?._id },
+          {
+            approvedUserId: "",
+            saleData: "rejected",
+            rejectedUserId: [],
+          },
+          { new: true }
+        ).lean(),
+        TransferOwnership.findByIdAndUpdate(
+          {
+            _id: transferOwnershipId,
+          },
+          { approvedUserId: "", transerData: "rejected" },
+          { new: true }
+        ).lean(),
+      ]);
+
+    return res.success(
+      { transferOwnershipData: updatedTransferOwnership },
+      "Land added for transfer"
+    );
+  } catch (err) {
+    console.log(`Error from rejectLandForTransferOwnership : ${err}`);
     return res.fail(err);
   }
 };

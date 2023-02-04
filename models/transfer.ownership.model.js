@@ -17,6 +17,13 @@ const TransferOwnershipSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    transerData: {
+      type: String,
+      default: "pending",
+      enum: ["pending", "approved", "rejected"],
+      index: true,
+      required: true,
+    },
   },
   { timestamps: true }
 );

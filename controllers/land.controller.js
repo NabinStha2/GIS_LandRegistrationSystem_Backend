@@ -38,17 +38,17 @@ exports.createLand = async (req, res) => {
 
     await newLand.save();
 
-    // const existingUser = await User.findById({ _id: userId }).lean();
+    const existingUser = await User.findById({ _id: userId }).lean();
 
-    // if (!existingUser) {
-    //   throw new SetErrorResponse("User not found", 404);
-    // }
+    if (!existingUser) {
+      throw new SetErrorResponse("User not found", 404);
+    }
 
-    // const user = await User.findByIdAndUpdate(
-    //   { _id: userId },
-    //   { ownedLand: [...existingUser.ownedLand, newLand] },
-    //   { new: true }
-    // ).lean();
+    const user = await User.findByIdAndUpdate(
+      { _id: userId },
+      { ownedLand: [...existingUser.ownedLand, newLand] },
+      { new: true }
+    ).lean();
 
     // console.log(user);
 

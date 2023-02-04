@@ -46,31 +46,35 @@ module.exports.getAllLandSale = async (req, res) => {
       district,
       province,
     } = req?.query;
-    let query = [];
+    let query = {};
+    let populateQuery = [];
     if (search) {
-      query.push({ parcelId: { $regex: search, $options: "i" } });
+      populateQuery.push({ parcelId: { $regex: search, $options: "i" } });
     }
     if (city) {
-      query.push({ city: { $regex: city, $options: "i" } });
+      populateQuery.push({ city: { $regex: city, $options: "i" } });
     }
     if (district) {
-      query.push({ district: { $regex: district, $options: "i" } });
+      populateQuery.push({ district: { $regex: district, $options: "i" } });
     }
     if (province) {
-      query.push({ province: { $regex: province, $options: "i" } });
+      populateQuery.push({ province: { $regex: province, $options: "i" } });
     }
-    query.push({ isVerified: "approved" });
-    console.log(query);
+    populateQuery.push({ isVerified: "approved" });
+    query.saleData = "selling";
+
+    console.log(query, populateQuery);
 
     const landSale = await getSearchPaginatedData({
       model: LandSale,
       reqQuery: {
+        query,
         sort,
         page,
         limit,
         populate: {
           path: "landId",
-          match: query.length != 0 ? { $and: query } : {},
+          match: populateQuery.length != 0 ? { $and: populateQuery } : {},
         },
         pagination: true,
         modFunction: async (document) => {
@@ -177,6 +181,9 @@ exports.approveRequestedUserForLandSale = async (req, res) => {
     const landSale = await LandSale.findById({
       _id: landSaleId,
     }).lean();
+    if (!landSale) {
+      throw new SetErrorResponse("Land Sale not found");
+    }
 
     if (res.locals.authData?._id != landSale?.ownerUserId) {
       throw new SetErrorResponse(
@@ -201,6 +208,7 @@ exports.approveRequestedUserForLandSale = async (req, res) => {
       { _id: landSaleId },
       {
         approvedUserId: userId,
+        saleData: "processing",
         requestedUserId: [...requestedUserId],
       },
       { new: true }

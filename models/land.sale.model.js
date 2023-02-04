@@ -21,7 +21,7 @@ const LandSaleSchema = new mongoose.Schema({
   saleData: {
     type: String,
     default: "selling",
-    enum: ["selling", "selled"],
+    enum: ["selling", "processing", "selled", "rejected"],
     index: true,
     required: true,
   },
