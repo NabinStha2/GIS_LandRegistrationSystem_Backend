@@ -170,25 +170,25 @@ exports.validate = (params) => {
           );
           break;
 
-        case "latitude":
-          result.push(
-            check("latitude", "Latitude not Valid")
-              .notEmpty()
-              .toInt()
-              .isInt()
-              .withMessage("Latitude should be integer value")
-          );
-          break;
+        // case "latitude":
+        //   result.push(
+        //     check("latitude", "Latitude not Valid")
+        //       .notEmpty()
+        //       .isFloat()
+        //       .toFloat()
+        //       .withMessage("Latitude should be integer value")
+        //   );
+        //   break;
 
-        case "longitude":
-          result.push(
-            check("longitude", "Longitude not Valid")
-              .notEmpty()
-              .toInt()
-              .isInt()
-              .withMessage("Longitude should be integer value")
-          );
-          break;
+        // case "longitude":
+        //   result.push(
+        //     check("longitude", "Longitude not Valid")
+        //       .notEmpty() 
+        //       .isFloat()
+        //       .toFloat()
+        //       .withMessage("Longitude should be integer value")
+        //   );
+        //   break;
 
         case "surveyNo":
           result.push(

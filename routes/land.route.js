@@ -27,8 +27,6 @@ router.post(
     "area",
     "province",
     "district",
-    "latitude",
-    "longitude",
     "wardNo",
     "address",
   ]),

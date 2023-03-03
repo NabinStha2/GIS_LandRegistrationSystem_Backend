@@ -17,9 +17,9 @@ exports.createLand = async (req, res) => {
       wardNo,
       province,
       district,
-      latitude,
-      longitude,
+      polygon
     } = req.body;
+
 
     const newLand = new Land({
       city,
@@ -29,8 +29,7 @@ exports.createLand = async (req, res) => {
       wardNo,
       province,
       district,
-      latitude,
-      longitude,
+      polygon,
       landPrice,
       ownerUserId: userId,
       surveyNo,
@@ -61,6 +60,7 @@ exports.createLand = async (req, res) => {
 
 exports.getAllLands = async (req, res) => {
   try {
+    const userId = res.locals.authData?._id;
     const {
       page,
       limit,
@@ -83,7 +83,59 @@ exports.getAllLands = async (req, res) => {
     if (province) {
       query.province = { $regex: province, $options: "i" };
     }
-    query.isVerified = "approved";
+    // query.isVerified = "approved";
+    console.log(query);
+
+    const lands = await getSearchPaginatedData({
+      model: Land,
+      reqQuery: {
+        sort,
+        page,
+        limit,
+        query,
+        pagination: true,
+        modFunction: (document) => {
+          return document.ownerUserId == userId;
+        },
+      },
+      search: search,
+    });
+
+    if (!lands) {
+      throw new SetErrorResponse("Land not found", 404);
+    }
+    return res.success({ landData: lands });
+  } catch (err) {
+    console.log(`Err get all lands : ${err}`);
+    return res.fail(err);
+  }
+};
+
+exports.getAllOwnedLands = async (req, res) => {
+  try {
+    const {
+      page,
+      limit,
+      search = "",
+      sort,
+      city,
+      district,
+      province,
+    } = req?.query;
+    let query = {};
+    // if (search) {
+    //   query.parcelId = { $regex: search, $options: "i" };
+    // }
+    // if (city) {
+    //   query.city = { $regex: city, $options: "i" };
+    // }
+    // if (district) {
+    //   query.district = { $regex: district, $options: "i" };
+    // }
+    // if (province) {
+    //   query.province = { $regex: province, $options: "i" };
+    // }
+    // query.isVerified = "approved";
     console.log(query);
 
     const lands = await getSearchPaginatedData({

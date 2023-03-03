@@ -57,7 +57,7 @@ exports.uploadImages = ({
 
   const cloudinaryUpload = async (req, res, next) => {
     try {
-      console.log({ file: req.file, files: req.files });
+      console.log({ file: req.file, files: req.files?.userImage });
       if (req.file) {
         const renameImage =
           new Date().toISOString().replace(/:/g, "-").replace(".", "-", " ") +

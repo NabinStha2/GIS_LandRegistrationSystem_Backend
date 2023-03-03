@@ -25,9 +25,9 @@ app.use("*", (req, res, next) => {
 
 app.use("/api", MainRouter);
 
-app.use("/", (req, res, next) => {
-  return res.success("", "Welcome to the GIS Land Registration System.");
-});
+// app.use("/", (req, res, next) => {
+//   return res.success("", "Welcome to the GIS Land Registration System.");
+// });
 
 app.use("*", (req, res, next) => {
   return res.status(404).json({

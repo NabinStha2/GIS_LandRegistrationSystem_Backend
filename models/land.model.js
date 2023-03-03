@@ -14,18 +14,20 @@ const LandSchema = new Schema(
       required: true,
       trim: true,
     },
-    latitude: {
-      type: String,
-      required: true,
-      index: true,
-      trim: true,
-    },
-    longitude: {
-      type: String,
-      required: true,
-      index: true,
-      trim: true,
-    },
+    polygon:[
+      { latitude: {
+        type: String,
+        required: true,
+        index: true,
+        trim: true,
+      },
+      longitude: {
+        type: String,
+        required: true,
+        index: true,
+        trim: true,
+      },},
+    ],
     parcelId: {
       type: String,
       required: true,
