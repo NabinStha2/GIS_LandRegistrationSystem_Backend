@@ -115,7 +115,9 @@ const getPaginatedData = async function ({
     limit = limit ? parseInt(limit) : 25;
     const skipping = (page - 1) * limit;
 
-    const results = pagination
+    console.log(limit);
+
+    const resultsData = pagination
       ? await model
           .find(query)
           .sort(sort || "_id")
@@ -142,7 +144,7 @@ const getPaginatedData = async function ({
         .select(select)
         .lean(lean);
       data = (await Promise.all(res.map(modFunction))).filter(
-        (data) => data != null
+        (data) =>{ return data != null;}
       );
     } else {
       data = await model?.count(query);
@@ -155,10 +157,10 @@ const getPaginatedData = async function ({
       totalPages: Math.ceil(data.length / limit),
       currentPageNumber: page,
       results: modFunction
-        ? (await Promise.all(results.map(modFunction))).filter((data) => {
-            return data != null;
+        ? (await Promise.all(resultsData.map(modFunction))).filter((data) => {
+          console.log(data);    return data != null;
           })
-        : results,
+        : resultsData,
     };
   } catch (err) {
     throw err;

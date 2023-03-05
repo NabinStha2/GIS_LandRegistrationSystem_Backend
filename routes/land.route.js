@@ -6,6 +6,7 @@ const {
   landApprovedByAdmin,
   landRejectedByAdmin,
   getAllLandsByAdmin,
+  getAllOwnedLands,
 } = require("../controllers/land.controller");
 const { checkIsAdmin } = require("../middlewares/check.is.admin");
 const {
@@ -18,6 +19,8 @@ const { validator } = require("../utils/validator");
 const router = require("express").Router({ mergeParams: true });
 
 router.get("/", checkAuthValidation, getAllLands);
+
+router.get("/user-lands", checkAuthValidation, getAllOwnedLands);
 
 router.post(
   "/:id/add-land",

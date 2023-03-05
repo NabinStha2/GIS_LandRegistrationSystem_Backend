@@ -60,7 +60,6 @@ exports.createLand = async (req, res) => {
 
 exports.getAllLands = async (req, res) => {
   try {
-    const userId = res.locals.authData?._id;
     const {
       page,
       limit,
@@ -83,7 +82,7 @@ exports.getAllLands = async (req, res) => {
     if (province) {
       query.province = { $regex: province, $options: "i" };
     }
-    // query.isVerified = "approved";
+    query.isVerified = "approved";
     console.log(query);
 
     const lands = await getSearchPaginatedData({
@@ -95,7 +94,7 @@ exports.getAllLands = async (req, res) => {
         query,
         pagination: true,
         modFunction: (document) => {
-          return document.ownerUserId == userId;
+  return document;
         },
       },
       search: search,
@@ -113,6 +112,7 @@ exports.getAllLands = async (req, res) => {
 
 exports.getAllOwnedLands = async (req, res) => {
   try {
+    const userId = res.locals.authData?._id;
     const {
       page,
       limit,
@@ -123,9 +123,9 @@ exports.getAllOwnedLands = async (req, res) => {
       province,
     } = req?.query;
     let query = {};
-    // if (search) {
-    //   query.parcelId = { $regex: search, $options: "i" };
-    // }
+    if (search) {
+      query.parcelId = { $regex: search, $options: "i" };
+    }
     // if (city) {
     //   query.city = { $regex: city, $options: "i" };
     // }
@@ -136,7 +136,9 @@ exports.getAllOwnedLands = async (req, res) => {
     //   query.province = { $regex: province, $options: "i" };
     // }
     // query.isVerified = "approved";
-    console.log(query);
+    console.log(`limit: ${limit} :: page: ${page}`);
+
+    query.ownerUserId = userId;
 
     const lands = await getSearchPaginatedData({
       model: Land,
@@ -147,7 +149,7 @@ exports.getAllOwnedLands = async (req, res) => {
         query,
         pagination: true,
         modFunction: (document) => {
-          return document;
+            return document;
         },
       },
       search: search,
@@ -158,7 +160,7 @@ exports.getAllOwnedLands = async (req, res) => {
     }
     return res.success({ landData: lands });
   } catch (err) {
-    console.log(`Err get lands by admin : ${err}`);
+    console.log(`Err get owned lands : ${err}`);
     return res.fail(err);
   }
 };
