@@ -17,9 +17,8 @@ exports.createLand = async (req, res) => {
       wardNo,
       province,
       district,
-      polygon
+      polygon,
     } = req.body;
-
 
     const newLand = new Land({
       city,
@@ -94,7 +93,7 @@ exports.getAllLands = async (req, res) => {
         query,
         pagination: true,
         modFunction: (document) => {
-  return document;
+          return document;
         },
       },
       search: search,
@@ -149,7 +148,7 @@ exports.getAllOwnedLands = async (req, res) => {
         query,
         pagination: true,
         modFunction: (document) => {
-            return document;
+          return document;
         },
       },
       search: search,
@@ -170,9 +169,7 @@ exports.deleteLand = async (req, res) => {
     const landId = req.params.id;
 
     if (!res.locals.authData.isAdmin) {
-      const existingLand = await LandSale.findById({ _id: landId })
-        .populate({ path: "landId" })
-        .lean();
+      const existingLand = await Land.findById({ _id: landId }).lean();
 
       if (existingLand?.ownerUserId != res.locals.authData?._id) {
         throw new SetErrorResponse(
@@ -186,8 +183,29 @@ exports.deleteLand = async (req, res) => {
     if (!land) {
       throw new SetErrorResponse("Land not found"); // default (Not found,404)
     }
+
+    const existingUser = await User.findById({
+      _id: res.locals.authData?._id,
+    }).lean();
+
+    var filteredData;
+    if (existingUser) {
+      filteredData = existingUser.ownedLand.filter((e) => e != landId);
+      // console.log(filteredData);
+      const updatedUser = await User.findByIdAndUpdate(
+        {
+          _id: res.locals.authData?._id,
+        },
+        { ownedLand: filteredData },
+        {
+          new: true,
+        }
+      );
+      console.log(updatedUser);
+    }
     return res.success({ landData: land }, "Land Deleted ");
   } catch (err) {
+    console.log(`Err from delete lands : ${err}`);
     return res.fail(err);
   }
 };
