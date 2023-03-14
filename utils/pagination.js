@@ -94,11 +94,7 @@ exports.getSearchPaginatedData = async function ({
   }
 };
 
-const getPaginatedData = async function ({
-  model,
-  reqQuery,
-  select = "+_id",
-}) {
+const getPaginatedData = async function ({ model, reqQuery, select = "+_id" }) {
   try {
     const {
       query,
@@ -143,9 +139,9 @@ const getPaginatedData = async function ({
         .populate(populate || "")
         .select(select)
         .lean(lean);
-      data = (await Promise.all(res.map(modFunction))).filter(
-        (data) =>{ return data != null;}
-      );
+      data = (await Promise.all(res.map(modFunction))).filter((data) => {
+        return data != null;
+      });
     } else {
       data = await model?.count(query);
     }
@@ -158,7 +154,8 @@ const getPaginatedData = async function ({
       currentPageNumber: page,
       results: modFunction
         ? (await Promise.all(resultsData.map(modFunction))).filter((data) => {
-          console.log(data);    return data != null;
+            console.log(data);
+            return data != null;
           })
         : resultsData,
     };

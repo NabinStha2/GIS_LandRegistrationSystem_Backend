@@ -28,6 +28,15 @@ module.exports.addLandForSale = async (req, res) => {
 
     await newLandSale.save();
 
+    await Land.findByIdAndUpdate(
+      { _id: landId },
+      {
+        saleData: "selling",
+        landSaleId: newLandSale._id,
+      },
+      { new: true }
+    );
+
     return res.success({ landSaleData: newLandSale }, "Land added for sale");
   } catch (err) {
     console.log(`Error from addLandForSale :: ${err.message}`);
@@ -73,7 +82,7 @@ module.exports.getAllLandSale = async (req, res) => {
         page,
         limit,
         populate: {
-          path: "landId",
+          path: "requestedUserId landId ownerUserId rejectedUserId approvedUserId prevOwnerUserId",
           match: populateQuery.length != 0 ? { $and: populateQuery } : {},
         },
         pagination: true,
@@ -97,9 +106,157 @@ module.exports.getAllLandSale = async (req, res) => {
   }
 };
 
+module.exports.getAllLandSaleByRequestedUserId = async (req, res) => {
+  try {
+    const {
+      page,
+      limit,
+      search = "",
+      sort,
+      city,
+      district,
+      province,
+    } = req?.query;
+    let query = {};
+    let populateQuery = [];
+    // if (search) {
+    //   populateQuery.push({ parcelId: { $regex: search, $options: "i" } });
+    // }
+    // if (city) {
+    //   populateQuery.push({ city: { $regex: city, $options: "i" } });
+    // }
+    // if (district) {
+    //   populateQuery.push({ district: { $regex: district, $options: "i" } });
+    // }
+    // if (province) {
+    //   populateQuery.push({ province: { $regex: province, $options: "i" } });
+    // }
+    populateQuery.push({ isVerified: "approved" });
+    query.requestedUserId = res.locals.authData?._id;
+
+    console.log(query, populateQuery);
+
+    const landSale = await getSearchPaginatedData({
+      model: LandSale,
+      reqQuery: {
+        query,
+        sort,
+        page,
+        limit,
+        populate: {
+          path: "requestedUserId landId ownerUserId rejectedUserId approvedUserId prevOwnerUserId",
+          match: populateQuery.length != 0 ? { $and: populateQuery } : {},
+        },
+        pagination: true,
+        modFunction: async (document) => {
+          // console.log(`document :: ${document}`);
+          if (document.landId != null) {
+            return document;
+          }
+        },
+      },
+    });
+
+    if (!landSale) {
+      throw new SetErrorResponse("Land not found", 404);
+    }
+
+    return res.success({ landSaleData: landSale });
+  } catch (err) {
+    console.log(`Error from getAllLandSale :: ${err.message}`);
+    return res.fail(err);
+  }
+};
+
+module.exports.getOwnedLandSale = async (req, res) => {
+  try {
+    const {
+      page,
+      limit,
+      search = "",
+      sort,
+      city,
+      district,
+      province,
+    } = req?.query;
+    let query = {};
+    let populateQuery = [];
+    if (search) {
+      populateQuery.push({ parcelId: { $regex: search, $options: "i" } });
+    }
+    if (city) {
+      populateQuery.push({ city: { $regex: city, $options: "i" } });
+    }
+    if (district) {
+      populateQuery.push({ district: { $regex: district, $options: "i" } });
+    }
+    if (province) {
+      populateQuery.push({ province: { $regex: province, $options: "i" } });
+    }
+    populateQuery.push({ isVerified: "approved" });
+    // query.saleData = "selling";
+    query.ownerUserId = res.locals.authData?._id;
+
+    console.log(query, populateQuery);
+
+    const landSale = await getSearchPaginatedData({
+      model: LandSale,
+      reqQuery: {
+        query,
+        sort,
+        page,
+        limit,
+        populate: {
+          path: "requestedUserId landId ownerUserId rejectedUserId approvedUserId prevOwnerUserId",
+          match: populateQuery.length != 0 ? { $and: populateQuery } : {},
+        },
+        pagination: true,
+        modFunction: async (document) => {
+          // console.log(`document :: ${document}`);
+          if (document.landId != null) {
+            return document;
+          }
+        },
+      },
+    });
+
+    if (!landSale) {
+      throw new SetErrorResponse("Land not found", 404);
+    }
+
+    return res.success({ landSaleData: landSale });
+  } catch (err) {
+    console.log(`Error from getAllLandSale :: ${err.message}`);
+    return res.fail(err);
+  }
+};
+
+module.exports.getIndividualLandSaleById = async (req, res) => {
+  try {
+    const landSale = await LandSale.findById({ _id: req.params.id })
+      .populate({
+        path: "requestedUserId landId ownerUserId rejectedUserId approvedUserId prevOwnerUserId",
+        // populate: {
+        //   path: "ownerUserId",
+        // },
+      })
+      .lean();
+
+    if (!landSale) {
+      throw new SetErrorResponse("Land sale not found", 404);
+    }
+
+    return res.success({ landSaleData: landSale });
+  } catch (err) {
+    console.log(`Error from getIndividualLandSaleById :: ${err.message}`);
+    return res.fail(err);
+  }
+};
+
 module.exports.deleteLandSale = async (req, res) => {
   try {
     const landSaleId = req.params.id;
+    const landId = req.params.landId;
 
     if (!res.locals.authData.isAdmin) {
       const existingLandSale = await LandSale.findById({ _id: landSaleId })
@@ -121,6 +278,14 @@ module.exports.deleteLandSale = async (req, res) => {
     if (!landSale) {
       throw new SetErrorResponse("Land not found", 404);
     }
+
+    await Land.findOneAndUpdate(
+      { _id: landId },
+      {
+        saleData: "null",
+      },
+      { new: true }
+    );
 
     return res.success(
       { landSaleData: landSale },
@@ -151,14 +316,14 @@ exports.requestToBuyForLandSale = async (req, res) => {
       );
     }
 
-    let requestedUserId = [];
+    let requestedUserIdData = [];
 
-    requestedUserId.push(res.locals.authData?._id);
+    requestedUserIdData.push(res.locals.authData?._id);
 
     const updatedLandSale = await LandSale.findByIdAndUpdate(
       { _id: landSaleId },
       {
-        requestedUserId: [...requestedUserId],
+        requestedUserId: [...landSale.requestedUserId, requestedUserIdData],
       },
       { new: true }
     ).lean();
@@ -195,6 +360,10 @@ exports.approveRequestedUserForLandSale = async (req, res) => {
     const filterLandSale = landSale?.requestedUserId.find((e) => {
       return e.toString() == userId;
     });
+
+    if (landSale?.approvedUserId) {
+      throw new SetErrorResponse("Some user already accepted!", 401);
+    }
 
     if (!filterLandSale) {
       throw new SetErrorResponse("User not found for approve", 401);
@@ -258,7 +427,7 @@ exports.rejectRequestedUserForLandSale = async (req, res) => {
       { _id: landSaleId },
       {
         requestedUserId: [...requestedUserId],
-        rejectedUserId: [...rejectedUserId],
+        rejectedUserId: [...landSale.rejectedUserId, ...rejectedUserId],
       },
       { new: true }
     ).lean();

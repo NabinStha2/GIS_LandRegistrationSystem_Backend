@@ -5,6 +5,9 @@ const {
   requestToBuyForLandSale,
   approveRequestedUserForLandSale,
   rejectRequestedUserForLandSale,
+  getOwnedLandSale,
+  getIndividualLandSaleById,
+  getAllLandSaleByRequestedUserId,
 } = require("../controllers/land.sale.controller");
 const { checkAuthValidation } = require("../middlewares/checkAuthentication");
 const {
@@ -25,8 +28,14 @@ router.post(
 
 router.get("/", checkAuthValidation, getAllLandSale);
 
+router.get("/:id", checkAuthValidation, getOwnedLandSale);
+
+router.get("/individual/:id", checkAuthValidation, getIndividualLandSaleById);
+
+router.get("/requested/:id", checkAuthValidation, getAllLandSaleByRequestedUserId);
+
 router.delete(
-  "/:id",
+  "/:id/:landId",
   validate(["id"]),
   validator,
   checkAuthValidation,

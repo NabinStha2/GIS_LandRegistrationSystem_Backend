@@ -57,6 +57,23 @@ exports.createLand = async (req, res) => {
   }
 };
 
+module.exports.getIndividualLandById = async (req, res) => {
+  try {
+    const land = await Land.findById({ _id: req.params.id })
+      .populate({ path: "ownerUserId" })
+      .lean();
+
+    if (!land) {
+      throw new SetErrorResponse("Land not found", 404);
+    }
+
+    return res.success({ landData: land });
+  } catch (err) {
+    console.log(`Error from getIndividualLandById :: ${err.message}`);
+    return res.fail(err);
+  }
+};
+
 exports.getAllLands = async (req, res) => {
   try {
     const {
@@ -91,6 +108,10 @@ exports.getAllLands = async (req, res) => {
         page,
         limit,
         query,
+        populate: {
+          path: "ownerUserId",
+          select: "-frontCitizenshipFile -backCitizenshipFile -ownedLand",
+        },
         pagination: true,
         modFunction: (document) => {
           return document;
@@ -146,6 +167,10 @@ exports.getAllOwnedLands = async (req, res) => {
         page,
         limit,
         query,
+        populate: {
+          path: "ownerUserId",
+          select: "-frontCitizenshipFile -backCitizenshipFile -ownedLand",
+        },
         pagination: true,
         modFunction: (document) => {
           return document;

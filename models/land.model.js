@@ -14,19 +14,21 @@ const LandSchema = new Schema(
       required: true,
       trim: true,
     },
-    polygon:[
-      { latitude: {
-        type: String,
-        required: true,
-        index: true,
-        trim: true,
+    polygon: [
+      {
+        latitude: {
+          type: String,
+          required: true,
+          index: true,
+          trim: true,
+        },
+        longitude: {
+          type: String,
+          required: true,
+          index: true,
+          trim: true,
+        },
       },
-      longitude: {
-        type: String,
-        required: true,
-        index: true,
-        trim: true,
-      },},
     ],
     parcelId: {
       type: String,
@@ -86,6 +88,19 @@ const LandSchema = new Schema(
         default: [],
       },
     ],
+    saleData: {
+      type: String,
+      default: "null",
+      enum: ["null", "selling", "processing", "selled", "rejected"],
+      index: true,
+      required: true,
+    },
+    // landSaleId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   required: true,
+    //   index: true,
+    //   ref: "LandSale",
+    // },
   },
   { timestamps: true }
 );
